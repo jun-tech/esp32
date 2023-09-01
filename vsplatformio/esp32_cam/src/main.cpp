@@ -25,7 +25,7 @@
 #define HREF_GPIO_NUM 23
 #define PCLK_GPIO_NUM 22
 
-OV5640 ov5640 = OV5640();
+// OV5640 ov5640 = OV5640();
 
 const char *ssid = "360WiFi";
 const char *password = "fP7AyAzE8c";
@@ -81,61 +81,64 @@ void setup()
     Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
-  sensor_t *sensor = esp_camera_sensor_get();
-  ov5640.start(sensor);
+  // sensor_t *sensor = esp_camera_sensor_get();
+  // ov5640.start(sensor);
 
-  if (ov5640.focusInit() == 0)
-  {
-    Serial.println("OV5640_Focus_Init Successful!");
-  }
+  // if (ov5640.focusInit() == 0)
+  // {
+  //   Serial.println("OV5640_Focus_Init Successful!");
+  // }
 
-  if (ov5640.autoFocusMode() == 0)
-  {
-    Serial.println("OV5640_Auto_Focus Successful!");
-  }
+  // if (ov5640.autoFocusMode() == 0)
+  // {
+  //   Serial.println("OV5640_Auto_Focus Successful!");
+  // }
 
   wificonnect();
   startCameraServer();
+  Serial.print("Camera Ready! Use 'http://");
+  Serial.print(WiFi.localIP());
+  Serial.println("' to connect");
 }
 
 void loop()
 {
 
-  uint8_t rc = ov5640.getFWStatus();
-  Serial.printf("FW_STATUS = 0x%x\n", rc);
+  // uint8_t rc = ov5640.getFWStatus();
+  // Serial.printf("FW_STATUS = 0x%x\n", rc);
 
-  if (rc == -1)
-  {
-    Serial.println("Check your OV5640");
-  }
-  else if (rc == FW_STATUS_S_FOCUSED)
-  {
-    Serial.println("Focused!");
-  }
-  else if (rc == FW_STATUS_S_FOCUSING)
-  {
-    Serial.println("Focusing!");
-  }
-  else
-  {
-  }
-  camera_fb_t *fb = esp_camera_fb_get();
+  // if (rc == -1)
+  // {
+  //   Serial.println("Check your OV5640");
+  // }
+  // else if (rc == FW_STATUS_S_FOCUSED)
+  // {
+  //   Serial.println("Focused!");
+  // }
+  // else if (rc == FW_STATUS_S_FOCUSING)
+  // {
+  //   Serial.println("Focusing!");
+  // }
+  // else
+  // {
+  // }
+  // camera_fb_t *fb = esp_camera_fb_get();
 
-  if (!fb)
-  {
-    Serial.println("Camera capture failed");
-    esp_camera_fb_return(fb);
-    return;
-  }
+  // if (!fb)
+  // {
+  //   Serial.println("Camera capture failed");
+  //   esp_camera_fb_return(fb);
+  //   return;
+  // }
 
-  if (fb->format != PIXFORMAT_JPEG)
-  {
-    Serial.println("Non-JPEG data not implemented");
-    esp_camera_fb_return(fb);
-    return;
-  }
+  // if (fb->format != PIXFORMAT_JPEG)
+  // {
+  //   Serial.println("Non-JPEG data not implemented");
+  //   esp_camera_fb_return(fb);
+  //   return;
+  // }
 
-  // Draw Image on the display or Send Image to the connected device!
-  // With (fb->buf, fb->len);
-  esp_camera_fb_return(fb);
+  // // Draw Image on the display or Send Image to the connected device!
+  // // With (fb->buf, fb->len);
+  // esp_camera_fb_return(fb);
 }

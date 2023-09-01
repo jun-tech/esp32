@@ -91,14 +91,14 @@ static esp_err_t capture_handler(httpd_req_t *req)
     int64_t fr_start = esp_timer_get_time();
 
     // capture the image from camera
-    // if (FlashOn)
-    // {
-    //     gpio_set_level(4, 1);                 // turn led on
-    //     vTaskDelay(400 / portTICK_PERIOD_MS); // wait a little to get camera exposure settle to new light conditions
-    // }
+    if (FlashOn)
+    {
+        gpio_set_level(GPIO_NUM_4, 1);        // turn led on
+        vTaskDelay(400 / portTICK_PERIOD_MS); // wait a little to get camera exposure settle to new light conditions
+    }
     fb = esp_camera_fb_get(); // get camera frame
-    // if (FlashOn)
-    //     gpio_set_level(4, 0); // turn led off
+    if (FlashOn)
+        gpio_set_level(GPIO_NUM_4, 0); // turn led off
 
     if (!fb)
     {
@@ -125,7 +125,7 @@ static esp_err_t capture_handler(httpd_req_t *req)
     }
     esp_camera_fb_return(fb);
     int64_t fr_end = esp_timer_get_time();
-    ESP_LOGI(TAG, "JPG: %uB %ums", (uint32_t)(fb_len), (uint32_t)((fr_end - fr_start) / 1000));
+    Serial.printf("JPG: %uB %ums\r\n", (uint32_t)(fb_len), (uint32_t)((fr_end - fr_start) / 1000));
     return res;
 }
 
@@ -212,12 +212,10 @@ static esp_err_t stream_handler(httpd_req_t *req)
         last_frame = fr_end;
         frame_time /= 1000;
         uint32_t avg_frame_time = ra_filter_run(&ra_filter, frame_time);
-        ESP_LOGI(TAG, "MJPG: %uB %ums (%.1ffps), AVG: %ums (%.1ffps)"
-
-                 ,
-                 (uint32_t)(_jpg_buf_len),
-                 (uint32_t)frame_time, 1000.0 / (uint32_t)frame_time,
-                 avg_frame_time, 1000.0 / avg_frame_time
+        Serial.printf("MJPG: %uB %ums (%.1ffps), AVG: %ums (%.1ffps)\r\n",
+                      (uint32_t)(_jpg_buf_len),
+                      (uint32_t)frame_time, 1000.0 / (uint32_t)frame_time,
+                      avg_frame_time, 1000.0 / avg_frame_time
 
         );
     }
@@ -332,21 +330,20 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     else if (!strcmp(variable, "face_detect")) // toggle flash LED
     {
         // puts first "face_detect" then "face_recognize"to the OFF position on webpage if ->OFF, else turns LED on if FlashOn==off
-
         LEDon = val;
-        // if (LEDon)
-        // {
-        //     if (!FlashOn)
-        //         gpio_set_level(4, 1); // turn led on
-        // }
-        // else
-        //     gpio_set_level(4, 0); // turn led off
+        if (LEDon)
+        {
+            if (!FlashOn)
+                gpio_set_level(GPIO_NUM_4, 1); // turn led on
+        }
+        else
+            gpio_set_level(GPIO_NUM_4, 0); // turn led off
     }
     else if (!strcmp(variable, "face_recognize")) // enable flash on snapshot.
     {
         // puts first "face_recognize" then  "face_detect" to the ON position on webpage if ->ON, else just turns off FlashOn (turning off LED also in any case)
         FlashOn = val;
-        // gpio_set_level(4, 0); // turn led off
+        gpio_set_level(GPIO_NUM_4, 0); // turn led off
     }
 
     else // invalid input
@@ -427,8 +424,8 @@ void startCameraServer()
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     // init LED (only for AI-Thinker board!!)
-    // gpio_set_direction(4, GPIO_MODE_OUTPUT); // set portpin to output
-    // gpio_set_level(4, 0);                    // turn led off
+    gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT); // set portpin to output
+    gpio_set_level(GPIO_NUM_4, 0);                    // turn led off
 
     httpd_uri_t index_uri =
         {
@@ -467,7 +464,7 @@ void startCameraServer()
 
     ra_filter_init(&ra_filter, 20);
 
-    Serial.printf("Starting web server on port: '%d'", config.server_port);
+    Serial.printf("Starting web server on port: '%d'\r\n", config.server_port);
     if (httpd_start(&camera_httpd, &config) == ESP_OK)
     {
         httpd_register_uri_handler(camera_httpd, &index_uri);
@@ -478,7 +475,7 @@ void startCameraServer()
 
     config.server_port += 1;
     config.ctrl_port += 1;
-    Serial.printf("Starting stream server on port: '%d'", config.server_port);
+    Serial.printf("Starting stream server on port: '%d'\r\n", config.server_port);
     if (httpd_start(&stream_httpd, &config) == ESP_OK)
     {
         httpd_register_uri_handler(stream_httpd, &stream_uri);
