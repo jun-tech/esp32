@@ -1,0 +1,13 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.adapterTargetName": "esp32",
+  "idf.port": "/dev/ttyUSB0",
+  "idf.flashType": "UART",
+  "files.associations": {
+    "sdspi_host.h": "c",
+    "spi_common.h": "c",
+    "sdmmc_types.h": "c",
+    "dirent.h": "c",
+    "sdkconfig.h": "c"
+  }
+}
