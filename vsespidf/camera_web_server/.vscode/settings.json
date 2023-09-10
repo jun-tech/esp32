@@ -10,6 +10,12 @@
     "app_camera.h": "c",
     "ledc.h": "c",
     "app_wifi.h": "c",
-    "sdkconfig.h": "c"
+    "sdkconfig.h": "c",
+    "sdmmc_cmd.h": "c",
+    "esp_vfs_fat.h": "c",
+    "task.h": "c",
+    "freertos.h": "c",
+    "cstdio": "c",
+    "*.ipp": "c"
   }
 }
