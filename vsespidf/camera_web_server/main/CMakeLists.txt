@@ -1,4 +1,4 @@
-set(COMPONENT_SRCS "app_sdcard.c" "app_main.c" "app_wifi.c" "app_camera.c" "app_httpd.c" "app_mdns.c" "app_sdcard.c")
+set(COMPONENT_SRCS "Jpeg2AVI.c" "list.c" "app_sdcard.c" "app_main.c" "app_wifi.c" "app_camera.c" "app_httpd.c" "app_mdns.c" "app_sdcard.c" "Jpeg2AVI.c" "list.c")
 set(COMPONENT_ADD_INCLUDEDIRS "include")
 
 set(COMPONENT_REQUIRES

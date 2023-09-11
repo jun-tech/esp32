@@ -10,6 +10,7 @@
 #include "dirent.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "Jpeg2AVI.h"
 
 #define MOUNT_POINT "/sdcard"
 
@@ -97,6 +98,32 @@ void save_take_pic(void *vparams)
     }
 }
 
+void save_video(void *vparams)
+{
+    int i = 0;
+    FILE *f = fopen(MOUNT_POINT "/test2.avi", "wb");
+    jpeg2avi_start(f);
+    ESP_LOGI(TAG, "save_video start");
+    while (1)
+    {
+        camera_fb_t *fb = esp_camera_fb_get();
+        jpeg2avi_add_frame(f, fb->buf, fb->len);
+        ESP_LOGI(TAG, "save_video one frame");
+        esp_camera_fb_return(fb);
+        // fps 10
+        if (i > 300)
+        {
+            jpeg2avi_end(f, 1280, 720, 10);
+            fclose(f);
+            ESP_LOGI(TAG, "save_video end");
+            break;
+        }
+        i++;
+    }
+    ESP_LOGI(TAG, "save_video ok");
+    vTaskDelete(NULL);
+}
+
 void app_sdcard_main()
 {
     ESP_LOGI(TAG, "%s", "sdcard main");
@@ -125,6 +152,7 @@ void app_sdcard_main()
 
     ESP_LOGI(TAG, "Using SDMMC peripheral");
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    host.max_freq_khz = SDMMC_FREQ_HIGHSPEED;
 
     // This initializes the slot without card detect (CD) and write protect (WP) signals.
     // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
@@ -165,7 +193,10 @@ void app_sdcard_main()
     // 查看sdcard文件
     show_sdcard_files_info(card);
     // 保存一帧
-    xTaskCreate(save_take_pic, "saveTakePic", 1024 * 10, (void *)card, 1, NULL);
+    // xTaskCreate(save_take_pic, "saveTakePic", 1024 * 10, (void *)card, 1, NULL);
+    // 保存视频
+    xTaskCreate(save_video, "saveVideo", 1024 * 10, (void *)card, 1, NULL);
+
     // All done, unmount partition and disable SDMMC peripheral
     // esp_vfs_fat_sdcard_unmount(mount_point, card);
     // ESP_LOGI(TAG, "Card unmounted");

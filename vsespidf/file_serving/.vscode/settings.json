@@ -1,0 +1,13 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.port": "/dev/ttyUSB0",
+  "idf.flashType": "UART",
+  "files.associations": {
+    "sdmmc_host.h": "c",
+    "file_serving_example_common.h": "c",
+    "string.h": "c",
+    "esp_err.h": "c",
+    "sdkconfig.h": "c",
+    "sdmmc_cmd.h": "c"
+  }
+}
