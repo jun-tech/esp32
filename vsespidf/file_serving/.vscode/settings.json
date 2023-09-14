@@ -9,5 +9,6 @@
     "esp_err.h": "c",
     "sdkconfig.h": "c",
     "sdmmc_cmd.h": "c"
-  }
+  },
+  "idf.adapterTargetName": "esp32"
 }

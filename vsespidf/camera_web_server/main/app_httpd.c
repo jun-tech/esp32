@@ -18,10 +18,12 @@
 #include "img_converters.h"
 #include "fb_gfx.h"
 #include "driver/ledc.h"
-//#include "camera_index.h"
+// #include "camera_index.h"
 #include "sdkconfig.h"
 #include "app_mdns.h"
 #include "app_camera.h"
+
+// #include "opencv_process.h"
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
@@ -92,11 +94,11 @@ static face_id_list id_list = {0};
 
 typedef struct
 {
-    size_t size;  //number of values used for filtering
-    size_t index; //current value index
-    size_t count; //value count
+    size_t size;  // number of values used for filtering
+    size_t index; // current value index
+    size_t count; // value count
     int sum;
-    int *values; //array to be filled with values
+    int *values; // array to be filled with values
 } ra_filter_t;
 
 static ra_filter_t ra_filter;
@@ -266,7 +268,7 @@ static int run_face_recognition(dl_matrix3du_t *image_matrix, box_array_t *net_b
     else
     {
         ESP_LOGW(TAG, "Face Not Aligned");
-        //rgb_print(image_matrix, FACE_COLOR_YELLOW, "Human Detected");
+        // rgb_print(image_matrix, FACE_COLOR_YELLOW, "Human Detected");
     }
 
     dl_matrix3du_free(aligned_face);
@@ -310,12 +312,12 @@ static esp_err_t bmp_handler(httpd_req_t *req)
     snprintf(ts, 32, "%ld.%06ld", fb->timestamp.tv_sec, fb->timestamp.tv_usec);
     httpd_resp_set_hdr(req, "X-Timestamp", (const char *)ts);
 
-
-    uint8_t * buf = NULL;
+    uint8_t *buf = NULL;
     size_t buf_len = 0;
     bool converted = frame2bmp(fb, &buf, &buf_len);
     esp_camera_fb_return(fb);
-    if(!converted){
+    if (!converted)
+    {
         ESP_LOGE(TAG, "BMP Conversion failed");
         httpd_resp_send_500(req);
         return ESP_FAIL;
@@ -513,6 +515,10 @@ static esp_err_t stream_handler(httpd_req_t *req)
         }
         else
         {
+
+            // opencv
+            // img_process(1280, 720, (void *)(fb->buf), 1);
+
             _timestamp.tv_sec = fb->timestamp.tv_sec;
             _timestamp.tv_usec = fb->timestamp.tv_usec;
 #if CONFIG_ESP_FACE_DETECT_ENABLED
@@ -680,13 +686,16 @@ static esp_err_t parse_get(httpd_req_t *req, char **obuf)
     size_t buf_len = 0;
 
     buf_len = httpd_req_get_url_query_len(req) + 1;
-    if (buf_len > 1) {
+    if (buf_len > 1)
+    {
         buf = (char *)malloc(buf_len);
-        if (!buf) {
+        if (!buf)
+        {
             httpd_resp_send_500(req);
             return ESP_FAIL;
         }
-        if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK) {
+        if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK)
+        {
             *obuf = buf;
             return ESP_OK;
         }
@@ -702,11 +711,13 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     char variable[32];
     char value[32];
 
-    if (parse_get(req, &buf) != ESP_OK) {
+    if (parse_get(req, &buf) != ESP_OK)
+    {
         return ESP_FAIL;
     }
     if (httpd_query_key_value(buf, "var", variable, sizeof(variable)) != ESP_OK ||
-        httpd_query_key_value(buf, "val", value, sizeof(value)) != ESP_OK) {
+        httpd_query_key_value(buf, "val", value, sizeof(value)) != ESP_OK)
+    {
         free(buf);
         httpd_resp_send_404(req);
         return ESP_FAIL;
@@ -718,10 +729,13 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     sensor_t *s = esp_camera_sensor_get();
     int res = 0;
 
-    if (!strcmp(variable, "framesize")) {
-        if (s->pixformat == PIXFORMAT_JPEG) {
+    if (!strcmp(variable, "framesize"))
+    {
+        if (s->pixformat == PIXFORMAT_JPEG)
+        {
             res = s->set_framesize(s, (framesize_t)val);
-            if (res == 0) {
+            if (res == 0)
+            {
                 app_mdns_update_framesize(val);
             }
         }
@@ -773,7 +787,8 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     else if (!strcmp(variable, "ae_level"))
         res = s->set_ae_level(s, val);
 #ifdef CONFIG_LED_ILLUMINATOR_ENABLED
-    else if (!strcmp(variable, "led_intensity")) {
+    else if (!strcmp(variable, "led_intensity"))
+    {
         led_duty = val;
         if (isStreaming)
             enable_led(true);
@@ -781,10 +796,12 @@ static esp_err_t cmd_handler(httpd_req_t *req)
 #endif
 
 #if CONFIG_ESP_FACE_DETECT_ENABLED
-    else if (!strcmp(variable, "face_detect")) {
+    else if (!strcmp(variable, "face_detect"))
+    {
         detection_enabled = val;
 #if CONFIG_ESP_FACE_RECOGNITION_ENABLED
-        if (!detection_enabled) {
+        if (!detection_enabled)
+        {
             recognition_enabled = 0;
         }
 #endif
@@ -792,20 +809,24 @@ static esp_err_t cmd_handler(httpd_req_t *req)
 #if CONFIG_ESP_FACE_RECOGNITION_ENABLED
     else if (!strcmp(variable, "face_enroll"))
         is_enrolling = val;
-    else if (!strcmp(variable, "face_recognize")) {
+    else if (!strcmp(variable, "face_recognize"))
+    {
         recognition_enabled = val;
-        if (recognition_enabled) {
+        if (recognition_enabled)
+        {
             detection_enabled = val;
         }
     }
 #endif
 #endif
-    else {
+    else
+    {
         ESP_LOGI(TAG, "Unknown command: %s", variable);
         res = -1;
     }
 
-    if (res < 0) {
+    if (res < 0)
+    {
         return httpd_resp_send_500(req);
     }
 
@@ -813,7 +834,8 @@ static esp_err_t cmd_handler(httpd_req_t *req)
     return httpd_resp_send(req, NULL, 0);
 }
 
-static int print_reg(char * p, sensor_t * s, uint16_t reg, uint32_t mask){
+static int print_reg(char *p, sensor_t *s, uint16_t reg, uint32_t mask)
+{
     return sprintf(p, "\"0x%x\":%u,", reg, s->get_reg(s, reg, mask));
 }
 
@@ -825,33 +847,40 @@ static esp_err_t status_handler(httpd_req_t *req)
     char *p = json_response;
     *p++ = '{';
 
-    if(s->id.PID == OV5640_PID || s->id.PID == OV3660_PID){
-        for(int reg = 0x3400; reg < 0x3406; reg+=2){
-            p+=print_reg(p, s, reg, 0xFFF);//12 bit
+    if (s->id.PID == OV5640_PID || s->id.PID == OV3660_PID)
+    {
+        for (int reg = 0x3400; reg < 0x3406; reg += 2)
+        {
+            p += print_reg(p, s, reg, 0xFFF); // 12 bit
         }
-        p+=print_reg(p, s, 0x3406, 0xFF);
+        p += print_reg(p, s, 0x3406, 0xFF);
 
-        p+=print_reg(p, s, 0x3500, 0xFFFF0);//16 bit
-        p+=print_reg(p, s, 0x3503, 0xFF);
-        p+=print_reg(p, s, 0x350a, 0x3FF);//10 bit
-        p+=print_reg(p, s, 0x350c, 0xFFFF);//16 bit
+        p += print_reg(p, s, 0x3500, 0xFFFF0); // 16 bit
+        p += print_reg(p, s, 0x3503, 0xFF);
+        p += print_reg(p, s, 0x350a, 0x3FF);  // 10 bit
+        p += print_reg(p, s, 0x350c, 0xFFFF); // 16 bit
 
-        for(int reg = 0x5480; reg <= 0x5490; reg++){
-            p+=print_reg(p, s, reg, 0xFF);
+        for (int reg = 0x5480; reg <= 0x5490; reg++)
+        {
+            p += print_reg(p, s, reg, 0xFF);
         }
 
-        for(int reg = 0x5380; reg <= 0x538b; reg++){
-            p+=print_reg(p, s, reg, 0xFF);
+        for (int reg = 0x5380; reg <= 0x538b; reg++)
+        {
+            p += print_reg(p, s, reg, 0xFF);
         }
 
-        for(int reg = 0x5580; reg < 0x558a; reg++){
-            p+=print_reg(p, s, reg, 0xFF);
+        for (int reg = 0x5580; reg < 0x558a; reg++)
+        {
+            p += print_reg(p, s, reg, 0xFF);
         }
-        p+=print_reg(p, s, 0x558a, 0x1FF);//9 bit
-    } else if(s->id.PID == OV2640_PID){
-        p+=print_reg(p, s, 0xd3, 0xFF);
-        p+=print_reg(p, s, 0x111, 0xFF);
-        p+=print_reg(p, s, 0x132, 0xFF);
+        p += print_reg(p, s, 0x558a, 0x1FF); // 9 bit
+    }
+    else if (s->id.PID == OV2640_PID)
+    {
+        p += print_reg(p, s, 0xd3, 0xFF);
+        p += print_reg(p, s, 0x111, 0xFF);
+        p += print_reg(p, s, 0x132, 0xFF);
     }
 
     p += sprintf(p, "\"board\":\"%s\",", CAM_BOARD);
@@ -903,7 +932,7 @@ static esp_err_t status_handler(httpd_req_t *req)
 static esp_err_t mdns_handler(httpd_req_t *req)
 {
     size_t json_len = 0;
-    const char * json_response = app_mdns_query(&json_len);
+    const char *json_response = app_mdns_query(&json_len);
     httpd_resp_set_type(req, "application/json");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     return httpd_resp_send(req, json_response, json_len);
@@ -914,10 +943,12 @@ static esp_err_t xclk_handler(httpd_req_t *req)
     char *buf = NULL;
     char _xclk[32];
 
-    if (parse_get(req, &buf) != ESP_OK) {
+    if (parse_get(req, &buf) != ESP_OK)
+    {
         return ESP_FAIL;
     }
-    if (httpd_query_key_value(buf, "xclk", _xclk, sizeof(_xclk)) != ESP_OK) {
+    if (httpd_query_key_value(buf, "xclk", _xclk, sizeof(_xclk)) != ESP_OK)
+    {
         free(buf);
         httpd_resp_send_404(req);
         return ESP_FAIL;
@@ -929,7 +960,8 @@ static esp_err_t xclk_handler(httpd_req_t *req)
 
     sensor_t *s = esp_camera_sensor_get();
     int res = s->set_xclk(s, LEDC_TIMER_0, xclk);
-    if (res) {
+    if (res)
+    {
         return httpd_resp_send_500(req);
     }
 
@@ -944,12 +976,14 @@ static esp_err_t reg_handler(httpd_req_t *req)
     char _mask[32];
     char _val[32];
 
-    if (parse_get(req, &buf) != ESP_OK) {
+    if (parse_get(req, &buf) != ESP_OK)
+    {
         return ESP_FAIL;
     }
     if (httpd_query_key_value(buf, "reg", _reg, sizeof(_reg)) != ESP_OK ||
         httpd_query_key_value(buf, "mask", _mask, sizeof(_mask)) != ESP_OK ||
-        httpd_query_key_value(buf, "val", _val, sizeof(_val)) != ESP_OK) {
+        httpd_query_key_value(buf, "val", _val, sizeof(_val)) != ESP_OK)
+    {
         free(buf);
         httpd_resp_send_404(req);
         return ESP_FAIL;
@@ -963,7 +997,8 @@ static esp_err_t reg_handler(httpd_req_t *req)
 
     sensor_t *s = esp_camera_sensor_get();
     int res = s->set_reg(s, reg, mask, val);
-    if (res) {
+    if (res)
+    {
         return httpd_resp_send_500(req);
     }
 
@@ -977,11 +1012,13 @@ static esp_err_t greg_handler(httpd_req_t *req)
     char _reg[32];
     char _mask[32];
 
-    if (parse_get(req, &buf) != ESP_OK) {
+    if (parse_get(req, &buf) != ESP_OK)
+    {
         return ESP_FAIL;
     }
     if (httpd_query_key_value(buf, "reg", _reg, sizeof(_reg)) != ESP_OK ||
-        httpd_query_key_value(buf, "mask", _mask, sizeof(_mask)) != ESP_OK) {
+        httpd_query_key_value(buf, "mask", _mask, sizeof(_mask)) != ESP_OK)
+    {
         free(buf);
         httpd_resp_send_404(req);
         return ESP_FAIL;
@@ -992,21 +1029,23 @@ static esp_err_t greg_handler(httpd_req_t *req)
     int mask = atoi(_mask);
     sensor_t *s = esp_camera_sensor_get();
     int res = s->get_reg(s, reg, mask);
-    if (res < 0) {
+    if (res < 0)
+    {
         return httpd_resp_send_500(req);
     }
     ESP_LOGI(TAG, "Get Register: reg: 0x%02x, mask: 0x%02x, value: 0x%02x", reg, mask, res);
 
     char buffer[20];
-    const char * val = itoa(res, buffer, 10);
+    const char *val = itoa(res, buffer, 10);
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     return httpd_resp_send(req, val, strlen(val));
 }
 
-static int parse_get_var(char *buf, const char * key, int def)
+static int parse_get_var(char *buf, const char *key, int def)
 {
     char _int[16];
-    if(httpd_query_key_value(buf, key, _int, sizeof(_int)) != ESP_OK){
+    if (httpd_query_key_value(buf, key, _int, sizeof(_int)) != ESP_OK)
+    {
         return def;
     }
     return atoi(_int);
@@ -1016,7 +1055,8 @@ static esp_err_t pll_handler(httpd_req_t *req)
 {
     char *buf = NULL;
 
-    if (parse_get(req, &buf) != ESP_OK) {
+    if (parse_get(req, &buf) != ESP_OK)
+    {
         return ESP_FAIL;
     }
 
@@ -1033,7 +1073,8 @@ static esp_err_t pll_handler(httpd_req_t *req)
     ESP_LOGI(TAG, "Set Pll: bypass: %d, mul: %d, sys: %d, root: %d, pre: %d, seld5: %d, pclken: %d, pclk: %d", bypass, mul, sys, root, pre, seld5, pclken, pclk);
     sensor_t *s = esp_camera_sensor_get();
     int res = s->set_pll(s, bypass, mul, sys, root, pre, seld5, pclken, pclk);
-    if (res) {
+    if (res)
+    {
         return httpd_resp_send_500(req);
     }
 
@@ -1045,7 +1086,8 @@ static esp_err_t win_handler(httpd_req_t *req)
 {
     char *buf = NULL;
 
-    if (parse_get(req, &buf) != ESP_OK) {
+    if (parse_get(req, &buf) != ESP_OK)
+    {
         return ESP_FAIL;
     }
 
@@ -1066,7 +1108,8 @@ static esp_err_t win_handler(httpd_req_t *req)
     ESP_LOGI(TAG, "Set Window: Start: %d %d, End: %d %d, Offset: %d %d, Total: %d %d, Output: %d %d, Scale: %u, Binning: %u", startX, startY, endX, endY, offsetX, offsetY, totalX, totalY, outputX, outputY, scale, binning);
     sensor_t *s = esp_camera_sensor_get();
     int res = s->set_res_raw(s, startX, startY, endX, endY, offsetX, offsetY, totalX, totalY, outputX, outputY, scale, binning);
-    if (res) {
+    if (res)
+    {
         return httpd_resp_send_500(req);
     }
 
@@ -1080,26 +1123,36 @@ static esp_err_t index_handler(httpd_req_t *req)
     extern const unsigned char index_ov2640_html_gz_end[] asm("_binary_index_ov2640_html_gz_end");
     size_t index_ov2640_html_gz_len = index_ov2640_html_gz_end - index_ov2640_html_gz_start;
 
-    extern const unsigned char index_ov3660_html_gz_start[] asm("_binary_index_ov3660_html_gz_start");
-    extern const unsigned char index_ov3660_html_gz_end[] asm("_binary_index_ov3660_html_gz_end");
-    size_t index_ov3660_html_gz_len = index_ov3660_html_gz_end - index_ov3660_html_gz_start;
+    // extern const unsigned char index_ov3660_html_gz_start[] asm("_binary_index_ov3660_html_gz_start");
+    // extern const unsigned char index_ov3660_html_gz_end[] asm("_binary_index_ov3660_html_gz_end");
+    // size_t index_ov3660_html_gz_len = index_ov3660_html_gz_end - index_ov3660_html_gz_start;
 
-    extern const unsigned char index_ov5640_html_gz_start[] asm("_binary_index_ov5640_html_gz_start");
-    extern const unsigned char index_ov5640_html_gz_end[] asm("_binary_index_ov5640_html_gz_end");
-    size_t index_ov5640_html_gz_len = index_ov5640_html_gz_end - index_ov5640_html_gz_start;
+    // extern const unsigned char index_ov5640_html_gz_start[] asm("_binary_index_ov5640_html_gz_start");
+    // extern const unsigned char index_ov5640_html_gz_end[] asm("_binary_index_ov5640_html_gz_end");
+    // size_t index_ov5640_html_gz_len = index_ov5640_html_gz_end - index_ov5640_html_gz_start;
 
     httpd_resp_set_type(req, "text/html");
     httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
     sensor_t *s = esp_camera_sensor_get();
-    if (s != NULL) {
-        if (s->id.PID == OV3660_PID) {
-            return httpd_resp_send(req, (const char *)index_ov3660_html_gz_start, index_ov3660_html_gz_len);
-        } else if (s->id.PID == OV5640_PID) {
-            return httpd_resp_send(req, (const char *)index_ov5640_html_gz_start, index_ov5640_html_gz_len);
-        } else {
-            return httpd_resp_send(req, (const char *)index_ov2640_html_gz_start, index_ov2640_html_gz_len);
-        }
-    } else {
+    if (s != NULL)
+    {
+        // if (s->id.PID == OV3660_PID)
+        // {
+        //     return httpd_resp_send(req, (const char *)index_ov3660_html_gz_start, index_ov3660_html_gz_len);
+        // }
+        // else if (s->id.PID == OV5640_PID)
+        // {
+        //     return httpd_resp_send(req, (const char *)index_ov5640_html_gz_start, index_ov5640_html_gz_len);
+        // }
+        // else
+        // {
+        //     return httpd_resp_send(req, (const char *)index_ov2640_html_gz_start, index_ov2640_html_gz_len);
+        // }
+
+        return httpd_resp_send(req, (const char *)index_ov2640_html_gz_start, index_ov2640_html_gz_len);
+    }
+    else
+    {
         ESP_LOGE(TAG, "Camera sensor not found");
         return httpd_resp_send_500(req);
     }

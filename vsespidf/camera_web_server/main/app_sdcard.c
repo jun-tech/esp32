@@ -96,6 +96,7 @@ void save_take_pic(void *vparams)
         //
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
+    vTaskDelete(NULL);
 }
 
 void save_video(void *vparams)
@@ -108,7 +109,7 @@ void save_video(void *vparams)
     {
         camera_fb_t *fb = esp_camera_fb_get();
         jpeg2avi_add_frame(f, fb->buf, fb->len);
-        ESP_LOGI(TAG, "save_video one frame");
+        // ESP_LOGI(TAG, "save_video one frame");
         esp_camera_fb_return(fb);
         // fps 10
         if (i > 300)
@@ -193,9 +194,9 @@ void app_sdcard_main()
     // 查看sdcard文件
     show_sdcard_files_info(card);
     // 保存一帧
-    // xTaskCreate(save_take_pic, "saveTakePic", 1024 * 10, (void *)card, 1, NULL);
+    xTaskCreate(save_take_pic, "saveTakePic", 1024 * 10, (void *)card, 1, NULL);
     // 保存视频
-    xTaskCreate(save_video, "saveVideo", 1024 * 10, (void *)card, 1, NULL);
+    // xTaskCreate(save_video, "saveVideo", 1024 * 10, (void *)card, 1, NULL);
 
     // All done, unmount partition and disable SDMMC peripheral
     // esp_vfs_fat_sdcard_unmount(mount_point, card);

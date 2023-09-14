@@ -26,6 +26,16 @@
 #include "app_mdns.h"
 #include "app_sdcard.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+    void app_main(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 void app_main()
 {
     app_wifi_main();

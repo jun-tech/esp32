@@ -16,6 +16,9 @@
     "task.h": "c",
     "freertos.h": "c",
     "cstdio": "c",
-    "*.ipp": "c"
+    "*.ipp": "c",
+    "opencv_process.h": "c",
+    "core.hpp": "c",
+    "esp_log.h": "c"
   }
 }
