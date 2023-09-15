@@ -8,7 +8,8 @@
     "string.h": "c",
     "esp_err.h": "c",
     "sdkconfig.h": "c",
-    "sdmmc_cmd.h": "c"
+    "sdmmc_cmd.h": "c",
+    "led_strip.h": "c"
   },
   "idf.adapterTargetName": "esp32"
 }

@@ -20,6 +20,12 @@
 #include "protocol_examples_common.h"
 #include "file_serving_example_common.h"
 
+#include "driver/gpio.h"
+#include "esp_system.h"
+#include "led_strip.h"
+
+#define BLINK_GPIO 2
+
 /* This example demonstrates how to create file server
  * using esp_http_server. This file has only startup code.
  * Look in file_server.c for the implementation.
@@ -27,15 +33,25 @@
 
 static const char *TAG = "example";
 
+void led_init()
+{
+    gpio_reset_pin(BLINK_GPIO);
+    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+}
+
 void app_main(void)
 {
+
+    // 外设要在main处初始化
+    led_init();
+
     ESP_LOGI(TAG, "Starting example");
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     /* Initialize file storage */
-    const char* base_path = "/data";
+    const char *base_path = "/data";
     ESP_ERROR_CHECK(example_mount_storage(base_path));
 
     /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
