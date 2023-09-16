@@ -9,5 +9,6 @@
     "esp_system.h": "c"
   },
   "idf.flashType": "UART",
-  "idf.port": "/dev/ttyUSB0"
+  "idf.port": "/dev/ttyUSB0",
+  "idf.adapterTargetName": "esp32"
 }
