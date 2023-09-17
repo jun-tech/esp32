@@ -52,7 +52,7 @@ void task4(void *pvParam)
 {
     MyStruct *pStruct;
     pStruct = (MyStruct *)pvParam;
-    ESP_LOGI("task3", "value : %d,str : %s", pStruct->i, pStruct->str);
+    ESP_LOGI("task4", "value : %d,str : %s", pStruct->i, pStruct->str);
     vTaskDelete(NULL);
 }
 
@@ -64,6 +64,8 @@ void app_main(void)
     xTaskCreate(task2, "task2", 3460, (void *)&i, 2, NULL);
     xTaskCreate(task3, "task3", 3460, (void *)str, 3, NULL);
     xTaskCreate(task4, "task4", 1024 * 5, (void *)&mystruct, 3, NULL);
+    // 双核写法
+    xTaskCreatePinnedToCore(task4, "task5", 1024 * 5, (void *)&mystruct, 3, NULL, 1);
     // vTaskList 需要打开配置menuconfig - freertos 打勾
     // Enable FreeRTOS trace facility
     // Enable FreeRTOS stats formatting functions
