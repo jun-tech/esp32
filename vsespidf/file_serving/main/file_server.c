@@ -337,6 +337,11 @@ static esp_err_t download_get_handler(httpd_req_t *req)
     httpd_resp_set_hdr(req, "Connection", "close");
 #endif
     httpd_resp_send_chunk(req, NULL, 0);
+
+    // 翻转状态
+    s_led_state = 0;
+    // 开关灯
+    gpio_set_level(BLINK_GPIO, s_led_state);
     return ESP_OK;
 }
 

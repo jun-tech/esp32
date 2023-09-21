@@ -1,0 +1,33 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.port": "/dev/ttyUSB0",
+  "idf.adapterTargetName": "esp32",
+  "idf.openOcdConfigs": [
+    "board/esp32-bridge.cfg"
+  ],
+  "idf.flashType": "UART",
+  "files.associations": {
+    "app_camera.h": "c",
+    "ledc.h": "c",
+    "app_wifi.h": "c",
+    "sdkconfig.h": "c",
+    "sdmmc_cmd.h": "c",
+    "esp_vfs_fat.h": "c",
+    "task.h": "c",
+    "freertos.h": "c",
+    "cstdio": "c",
+    "*.ipp": "c",
+    "opencv_process.h": "c",
+    "core.hpp": "c",
+    "esp_log.h": "c",
+    "avi_recorder.h": "c",
+    "esp_http_server.h": "c",
+    "esp_spiffs.h": "c",
+    "dirent.h": "c",
+    "chrono": "c",
+    "condition_variable": "c",
+    "ctime": "c",
+    "mutex": "c",
+    "thread": "c"
+  }
+}
