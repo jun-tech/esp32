@@ -18,6 +18,8 @@
 
 static const char *TAG = "app_sdcard";
 
+sdmmc_card_t *card;
+
 void show_sdcard_files_info(sdmmc_card_t *card)
 {
     // Card has been initialized, print its properties
@@ -56,30 +58,76 @@ void show_sdcard_files_info(sdmmc_card_t *card)
     }
 }
 
-void sd_write_jpg(const char *_jpg_buf, int _jpg_buf_len)
+// sdcard 已用
+void sdcard_usage(size_t *usage)
 {
-    time_t now;
-    char fname[64];
-    struct tm timeinfo;
+    // 查看当前磁盘一级目录文件
+    int i = 0;
+    DIR *dir = NULL;
+    struct dirent *entry = NULL;
+    // 信息
+    char entrypath[1024];
+    struct stat entry_stat;
+    const char *entrytype;
 
-    time(&now);
-    // Set timezone to China Standard Time
-    setenv("TZ", "CST-8", 1);
-    tzset();
-
-    localtime_r(&now, &timeinfo);
-    sprintf(fname, MOUNT_POINT "/%08x.jpg", (unsigned int)now);
-    ESP_LOGI(TAG, "fname:%s", fname);
-    // 上面先用系统时间生成文件名，然后开始写入流程
-    FILE *f = fopen(fname, "w");
-    if (f == NULL)
+    if ((dir = opendir(MOUNT_POINT)) == NULL)
     {
-        ESP_LOGE(TAG, "Failed to open file for writing");
+        ESP_LOGE(TAG, "opendir failed!");
         return;
     }
-    // 进行写入数据
-    fwrite(_jpg_buf, _jpg_buf_len, 1, f);
-    fclose(f);
+    else
+    {
+        while ((entry = readdir(dir)) != NULL)
+        {
+            // 如果是文件
+            if (entry->d_type != DT_DIR)
+            {
+                entrytype = (entry->d_type == DT_DIR ? "directory" : "file");
+                // 路径
+                sprintf(entrypath, "%s/%s", MOUNT_POINT, entry->d_name);
+                // 查看文件信息
+                if (stat(entrypath, &entry_stat) == -1)
+                {
+                    ESP_LOGE(TAG, "Failed to stat %s : %s", entrytype, entry->d_name);
+                    continue;
+                }
+                *usage = *usage + entry_stat.st_size;
+            }
+
+            i++;
+            ESP_LOGI(TAG, "filename%d = %s, filetype = %d", i, entry->d_name, entry->d_type); // 输出文件或者目录的名称,输出文件类型
+        }
+
+        closedir(dir);
+    }
+}
+
+void sdcard_remove(int num)
+{
+    int i = 0;
+    char filepath[500];
+    DIR *dir = NULL;
+    struct dirent *entry = NULL;
+    if ((dir = opendir(MOUNT_POINT)) == NULL)
+    {
+        ESP_LOGE(TAG, "opendir failed!");
+        return;
+    }
+    else
+    {
+        while ((entry = readdir(dir)) != NULL && i < num)
+        {
+            // 如果是文件
+            if (entry->d_type != DT_DIR)
+            {
+                sprintf(filepath, "%s/%s", MOUNT_POINT, entry->d_name);
+                unlink(filepath);
+                i++;
+                ESP_LOGI(TAG, "file%d = %s, remove success", i, filepath);
+            }
+        }
+    }
+    closedir(dir);
 }
 
 static int _get_frame(void **buf, size_t *len)
@@ -92,7 +140,7 @@ static int _get_frame(void **buf, size_t *len)
     }
     else
     {
-        // ESP_LOGI(TAG, "len=%d", image_fb->len);
+        // ESP_LOGI(TAG, "len=%d, w=%d, h=%d", image_fb->len, image_fb->width, image_fb->height);
         *buf = &image_fb->buf;
         *len = image_fb->len;
     }
@@ -106,27 +154,76 @@ static int _return_frame(void *inbuf)
     return 0;
 }
 
+esp_err_t get_video_size(int *w, int *h)
+{
+    camera_fb_t *image_fb = esp_camera_fb_get();
+    if (!image_fb)
+    {
+        ESP_LOGE(TAG, "Camera capture failed");
+        *w = resolution[FRAMESIZE_QSXGA].width;
+        *h = resolution[FRAMESIZE_QSXGA].height;
+        return ESP_FAIL;
+    }
+    else
+    {
+        *w = image_fb->width;
+        *h = image_fb->height;
+        esp_camera_fb_return(image_fb);
+        return ESP_OK;
+    }
+}
+
 void save_video(void *vparams)
 {
+    vTaskDelay(pdMS_TO_TICKS(5000));
+
+    int video_w = 0;
+    int video_h = 0;
+    // 时间戳
+    time_t now;
+    char fname[64];
+    struct tm *timeinfo;
+
     while (1)
     {
-        // 时间戳
-        time_t now;
-        char fname[64];
-        struct tm timeinfo;
-
         time(&now);
-        // Set timezone to China Standard Time
-        setenv("TZ", "CST-8", 1);
-        tzset();
-
-        localtime_r(&now, &timeinfo);
-        // sprintf(fname, MOUNT_POINT "/recorde_%08x.avi", (unsigned int)now);
-        sprintf(fname, MOUNT_POINT "/recorde_%02x%02x%02x%02x%02x.avi", timeinfo.tm_year, timeinfo.tm_mon, timeinfo.tm_mday, timeinfo.tm_hour, timeinfo.tm_min);
-
+        timeinfo = localtime(&now);
+        strftime(fname, 80, MOUNT_POINT "/record_%Y%m%d_%H%M.avi", timeinfo);
         // 保存视频
-        avi_recorder_start(fname, _get_frame, _return_frame, resolution[FRAMESIZE_QSXGA].width, resolution[FRAMESIZE_QSXGA].height, 60, 1);
+        esp_err_t flag = get_video_size(&video_w, &video_h);
+        if (flag == ESP_OK)
+        {
+            ESP_LOGI(TAG, "record video w=%d, h=%d", video_w, video_h);
+        }
+        else
+        {
+            // 报错
+            vTaskDelay(pdMS_TO_TICKS(3000));
+            continue;
+        }
+
+        // 统计下已用
+        size_t total = 1024 * 1024 * 1024 * 1; // 1G
+        size_t usage = 0;
+        sdcard_usage(&usage);
+        ESP_LOGI(TAG, "usage %d(Bytes), total %d(Bytes)", usage, total);
+        if (usage > 0)
+        {
+            // 超过70%, 删除20个
+            size_t precent = (usage * 100) / total;
+            ESP_LOGI(TAG, "usage %d(Precent)", precent);
+            if (precent > 70)
+            {
+                sdcard_remove(20);
+            }
+        }
+        // 记录视频
+        avi_recorder_start(fname, _get_frame, _return_frame, video_w, video_h, 60, 1);
         avi_recorder_stop();
+        // 打印sdcard信息
+        // sdmmc_card_print_info(stdout, card);
+        // 歇1分钟，不然发烫容易烧sdcard
+        vTaskDelay(pdMS_TO_TICKS(60 * 1000));
     }
 
     vTaskDelete(NULL);
@@ -149,7 +246,6 @@ void app_sdcard_main()
 #endif // EXAMPLE_FORMAT_IF_MOUNT_FAILED
         .max_files = 5,
         .allocation_unit_size = 16 * 1024};
-    sdmmc_card_t *card;
     const char mount_point[] = MOUNT_POINT;
     ESP_LOGI(TAG, "Initializing SD card");
 

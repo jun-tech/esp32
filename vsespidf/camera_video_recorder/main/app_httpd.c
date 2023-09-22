@@ -21,17 +21,25 @@
 #include "sdkconfig.h"
 #include "app_camera.h"
 
-// sdcard
+// sdcard begin
+#include <sys/unistd.h>
 #include <sys/stat.h>
 #include "dirent.h"
 
-#if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
-#include "esp32-hal-log.h"
-#define TAG ""
-#else
+#define BLINK_GPIO 2
+/* Scratch buffer size */
+#define SCRATCH_BUFSIZE 8192
+
+struct file_server_data
+{
+    /* Scratch buffer for temporary storage during file transfer */
+    char scratch[SCRATCH_BUFSIZE];
+};
+// sdcard end
+
+#include "esp_err.h"
 #include "esp_log.h"
 static const char *TAG = "camera_httpd";
-#endif
 
 #if CONFIG_ESP_FACE_DETECT_ENABLED
 
@@ -1162,6 +1170,7 @@ static esp_err_t videos_handler(httpd_req_t *req)
     }
     else
     {
+        char entrypath[1024];
         char entrysize[16];
         const char *entrytype;
         /* Send HTML file header */
@@ -1177,7 +1186,10 @@ static esp_err_t videos_handler(httpd_req_t *req)
         {
             // 获取文件或目录属性数据
             entrytype = (entry->d_type == DT_DIR ? "directory" : "file");
-            if (stat(MOUNT_POINT, &entry_stat) == -1)
+            // 路径
+            sprintf(entrypath, "%s/%s", MOUNT_POINT, entry->d_name);
+            // 查看文件信息
+            if (stat(entrypath, &entry_stat) == -1)
             {
                 ESP_LOGE(TAG, "Failed to stat %s : %s", entrytype, entry->d_name);
                 continue;
@@ -1200,14 +1212,13 @@ static esp_err_t videos_handler(httpd_req_t *req)
             httpd_resp_sendstr_chunk(req, "</td><td>");
             httpd_resp_sendstr_chunk(req, entrysize);
             httpd_resp_sendstr_chunk(req, "</td><td>");
-            httpd_resp_sendstr_chunk(req, "<form method=\"post\" action=\"/delete");
-            httpd_resp_sendstr_chunk(req, req->uri);
+            httpd_resp_sendstr_chunk(req, "<form method=\"post\" action=\"/videos/delete/");
             httpd_resp_sendstr_chunk(req, entry->d_name);
             httpd_resp_sendstr_chunk(req, "\"><button type=\"submit\">Delete</button></form>");
             httpd_resp_sendstr_chunk(req, "</td></tr>\n");
 
             i++;
-            ESP_LOGI(TAG, "filename%d = %s, filetype = %d", i, entry->d_name, entry->d_type); // 输出文件或者目录的名称,输出文件类型
+            ESP_LOGI(TAG, "filename%d = %s, filetype = %d, filesize=%s", i, entry->d_name, entry->d_type, entrysize); // 输出文件或者目录的名称,输出文件类型
         }
 
         /* Finish the file list table */
@@ -1225,25 +1236,143 @@ static esp_err_t videos_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+#define IS_FILE_EXT(filename, ext) \
+    (strcasecmp(&filename[strlen(filename) - sizeof(ext) + 1], ext) == 0)
+
+/* Set HTTP response content type according to file extension */
+static esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filename)
+{
+    if (IS_FILE_EXT(filename, ".pdf"))
+    {
+        return httpd_resp_set_type(req, "application/pdf");
+    }
+    else if (IS_FILE_EXT(filename, ".html"))
+    {
+        return httpd_resp_set_type(req, "text/html");
+    }
+    else if (IS_FILE_EXT(filename, ".jpeg"))
+    {
+        return httpd_resp_set_type(req, "image/jpeg");
+    }
+    else if (IS_FILE_EXT(filename, ".ico"))
+    {
+        return httpd_resp_set_type(req, "image/x-icon");
+    }
+    else if (IS_FILE_EXT(filename, ".avi"))
+    {
+        return httpd_resp_set_type(req, "video/avi");
+    }
+    /* This is a limited set only */
+    /* For any other type always set as plain text */
+    return httpd_resp_set_type(req, "text/plain");
+}
+
 static esp_err_t videos_download_handler(httpd_req_t *req)
 {
     char filepath[200];
+    // 获取文件名
+    char *p_rstr = strrchr(req->uri, '/');
+    const char *p_filename = p_rstr + 1;
+    sprintf(filepath, "%s/%s", MOUNT_POINT, p_filename);
+    ESP_LOGI(TAG, "request uri %s,filepath: %s", req->uri, filepath);
+
+    // 打开文件
     FILE *fd = NULL;
     struct stat file_stat;
-
-    const char *filename = "ddd";
-    if (!filename)
+    // 查看文件状况
+    if (stat(filepath, &file_stat) == -1)
     {
-        ESP_LOGE(TAG, "Filename is too long");
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
+        ESP_LOGE(TAG, "Failed to stat file : %s", filepath);
+        /* Respond with 404 Not Found */
+        httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "File does not exist");
         return ESP_FAIL;
     }
-    httpd_resp_sendstr(req, filename);
+    // 打开文件
+    fd = fopen(filepath, "r");
+    if (!fd)
+    {
+        ESP_LOGE(TAG, "Failed to read existing file : %s", filepath);
+        /* Respond with 500 Internal Server Error */
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read existing file");
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "Sending file : %s (%ld bytes)...", p_filename, file_stat.st_size);
+    set_content_type_from_file(req, p_filename);
+
+    /* Retrieve the pointer to scratch buffer for temporary storage */
+    char *chunk = ((struct file_server_data *)req->user_ctx)->scratch;
+    size_t chunksize;
+    do
+    {
+        /* Read file in chunks into the scratch buffer */
+        chunksize = fread(chunk, 1, SCRATCH_BUFSIZE, fd);
+
+        if (chunksize > 0)
+        {
+            /* Send the buffer contents as HTTP response chunk */
+            if (httpd_resp_send_chunk(req, chunk, chunksize) != ESP_OK)
+            {
+                fclose(fd);
+                ESP_LOGE(TAG, "File sending failed!");
+                /* Abort sending file */
+                httpd_resp_sendstr_chunk(req, NULL);
+                /* Respond with 500 Internal Server Error */
+                httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to send file");
+                return ESP_FAIL;
+            }
+        }
+
+        /* Keep looping till the whole file is sent */
+    } while (chunksize != 0);
+
+    /* Close file after sending complete */
+    fclose(fd);
+    ESP_LOGI(TAG, "File sending complete");
+
+    httpd_resp_send_chunk(req, NULL, 0);
+
+    return ESP_OK;
+}
+
+static esp_err_t videos_delete_handler(httpd_req_t *req)
+{
+    char filepath[200];
+    // 获取文件名
+    char *p_rstr = strrchr(req->uri, '/');
+    char *p_filename = p_rstr + 1;
+    sprintf(filepath, "%s/%s", MOUNT_POINT, p_filename);
+    ESP_LOGI(TAG, "request uri %s,filepath: %s", req->uri, filepath);
+    //
+    /* Delete file */
+    unlink(filepath);
+
+    /* Redirect onto root to see the updated file list */
+    httpd_resp_set_status(req, "303 See Other");
+    httpd_resp_set_hdr(req, "Location", "/videos");
+    httpd_resp_sendstr(req, "File deleted successfully");
     return ESP_OK;
 }
 
 void app_httpd_main()
 {
+
+    // 创建一个
+    static struct file_server_data *server_data = NULL;
+
+    if (server_data)
+    {
+        ESP_LOGE(TAG, "File server already started");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    /* Allocate memory for server data */
+    server_data = calloc(1, sizeof(struct file_server_data));
+    if (!server_data)
+    {
+        ESP_LOGE(TAG, "Failed to allocate memory for server data");
+        return ESP_ERR_NO_MEM;
+    }
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.max_uri_handlers = 16;
@@ -1334,6 +1463,12 @@ void app_httpd_main()
         .uri = "/videos/*",
         .method = HTTP_GET,
         .handler = videos_download_handler,
+        .user_ctx = server_data};
+
+    httpd_uri_t videos_delete_uri = {
+        .uri = "/videos/delete/*",
+        .method = HTTP_POST,
+        .handler = videos_delete_handler,
         .user_ctx = NULL};
 
     ra_filter_init(&ra_filter, 20);
@@ -1378,6 +1513,7 @@ void app_httpd_main()
 
         httpd_register_uri_handler(camera_httpd, &videos_uri);
         httpd_register_uri_handler(camera_httpd, &videos_download_uri);
+        httpd_register_uri_handler(camera_httpd, &videos_delete_uri);
     }
 
     config.server_port += 1;

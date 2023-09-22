@@ -28,6 +28,12 @@
     "condition_variable": "c",
     "ctime": "c",
     "mutex": "c",
-    "thread": "c"
+    "thread": "c",
+    "app_sntp.h": "c",
+    "esp_sntp.h": "c",
+    "*.inc": "c",
+    "esp_err.h": "c",
+    "stat.h": "c",
+    "unistd.h": "c"
   }
 }

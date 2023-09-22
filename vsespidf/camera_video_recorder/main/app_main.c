@@ -24,6 +24,7 @@
 #include "app_wifi.h"
 #include "app_httpd.h"
 #include "app_sdcard.h"
+#include "app_sntp.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -38,6 +39,7 @@ extern "C"
 void app_main()
 {
     app_wifi_main();
+    app_sntp_main();
     app_camera_main();
     app_httpd_main();
     app_sdcard_main();
