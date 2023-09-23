@@ -95,7 +95,7 @@ void sdcard_usage(size_t *usage)
             }
 
             i++;
-            ESP_LOGI(TAG, "filename%d = %s, filetype = %d", i, entry->d_name, entry->d_type); // 输出文件或者目录的名称,输出文件类型
+            // ESP_LOGI(TAG, "filename%d = %s, filetype = %d", i, entry->d_name, entry->d_type); // 输出文件或者目录的名称,输出文件类型
         }
 
         closedir(dir);
@@ -151,6 +151,7 @@ static int _return_frame(void *inbuf)
 {
     camera_fb_t *image_fb = __containerof(inbuf, camera_fb_t, buf);
     esp_camera_fb_return(image_fb);
+    image_fb = NULL;
     return 0;
 }
 
@@ -169,6 +170,7 @@ esp_err_t get_video_size(int *w, int *h)
         *w = image_fb->width;
         *h = image_fb->height;
         esp_camera_fb_return(image_fb);
+        image_fb = NULL;
         return ESP_OK;
     }
 }
@@ -201,7 +203,8 @@ void save_video(void *vparams)
             vTaskDelay(pdMS_TO_TICKS(3000));
             continue;
         }
-
+        // 延迟下
+        vTaskDelay(pdMS_TO_TICKS(3000));
         // 统计下已用
         size_t total = 1024 * 1024 * 1024 * 1; // 1G
         size_t usage = 0;
@@ -210,8 +213,8 @@ void save_video(void *vparams)
         if (usage > 0)
         {
             // 超过70%, 删除20个
-            size_t precent = (usage * 100) / total;
-            ESP_LOGI(TAG, "usage %d(Precent)", precent);
+            float precent = ((float)usage * 100) / (float)total;
+            ESP_LOGI(TAG, "usage %.2f(Precent)", precent);
             if (precent > 70)
             {
                 sdcard_remove(20);
@@ -220,8 +223,6 @@ void save_video(void *vparams)
         // 记录视频
         avi_recorder_start(fname, _get_frame, _return_frame, video_w, video_h, 60, 1);
         avi_recorder_stop();
-        // 打印sdcard信息
-        // sdmmc_card_print_info(stdout, card);
         // 歇1分钟，不然发烫容易烧sdcard
         vTaskDelay(pdMS_TO_TICKS(60 * 1000));
     }
@@ -239,11 +240,11 @@ void app_sdcard_main()
     // If format_if_mount_failed is set to true, SD card will be partitioned and
     // formatted in case when mounting fails.
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-#ifdef CONFIG_EXAMPLE_FORMAT_IF_MOUNT_FAILED
+        // #ifdef CONFIG_EXAMPLE_FORMAT_IF_MOUNT_FAILED
         .format_if_mount_failed = true,
-#else
-        .format_if_mount_failed = false,
-#endif // EXAMPLE_FORMAT_IF_MOUNT_FAILED
+        // #else
+        // .format_if_mount_failed = false,
+        // #endif // EXAMPLE_FORMAT_IF_MOUNT_FAILED
         .max_files = 5,
         .allocation_unit_size = 16 * 1024};
     const char mount_point[] = MOUNT_POINT;
@@ -299,7 +300,7 @@ void app_sdcard_main()
     // 查看sdcard文件
     // show_sdcard_files_info(card);
     // 保存视频
-    xTaskCreate(save_video, "saveVideo", 1024 * 10, (void *)card, 1, NULL);
+    xTaskCreate(save_video, "saveVideo", 1024 * 5, (void *)card, 1, NULL);
 
     // All done, unmount partition and disable SDMMC peripheral
     // esp_vfs_fat_sdcard_unmount(mount_point, card);
