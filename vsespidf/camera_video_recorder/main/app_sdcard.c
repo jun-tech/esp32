@@ -177,8 +177,6 @@ esp_err_t get_video_size(int *w, int *h)
 
 void save_video(void *vparams)
 {
-    vTaskDelay(pdMS_TO_TICKS(5000));
-
     int video_w = 0;
     int video_h = 0;
     // 时间戳
@@ -200,11 +198,8 @@ void save_video(void *vparams)
         else
         {
             // 报错
-            vTaskDelay(pdMS_TO_TICKS(3000));
             continue;
         }
-        // 延迟下
-        vTaskDelay(pdMS_TO_TICKS(3000));
         // 统计下已用
         size_t total = 1024 * 1024 * 1024 * 1; // 1G
         size_t usage = 0;

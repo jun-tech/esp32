@@ -30,6 +30,8 @@
 #include "esp_system.h"
 #include "led_strip.h"
 
+#include <fcntl.h>
+
 /* Max length a file path can have on storage */
 #define FILE_PATH_MAX (ESP_VFS_PATH_MAX + CONFIG_SPIFFS_OBJ_NAME_LEN)
 
@@ -44,6 +46,9 @@
 /* 闪灯指示 */
 static uint8_t s_led_state = 0;
 #define BLINK_GPIO 2
+
+/* 格式化日期*/
+#define FTP_UNIX_SECONDS_180_DAYS 15552000
 
 struct file_server_data
 {
@@ -79,6 +84,230 @@ static esp_err_t favicon_get_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+// 文件结构
+typedef struct file_info
+{
+    char file_name[50];
+    int file_type;
+    off_t file_size;
+    long file_msec;
+    struct file_info *next_file;
+
+} file_info_t;
+
+static void file_list_sort(const char *dirpath, file_info_t **file_info_list)
+{
+    DIR *dir = NULL;
+    struct dirent *entry = NULL;
+    struct stat entry_stat;
+
+    if ((dir = opendir(dirpath)) == NULL)
+    {
+        if (!dir)
+        {
+            ESP_LOGE(TAG, "Failed to stat dir");
+        }
+        return;
+    }
+    else
+    {
+        char entrypath[300];
+        // file_info *file_info_list = NULL;
+        file_info_t *file_info_new = NULL;
+        file_info_t *file_comparison = NULL;
+        file_info_t *prev_file = NULL;
+        // sdcard 列表
+        while ((entry = readdir(dir)) != NULL)
+        {
+            memset(entrypath, 0, sizeof(entrypath));
+            sprintf(entrypath, "%s/%s", dirpath, entry->d_name);
+            // 查看文件信息
+            if (stat(entrypath, &entry_stat) == -1)
+            {
+                ESP_LOGE(TAG, "Failed to stat %d : %s", entry->d_type, entry->d_name);
+                continue;
+            }
+            // 只要常规文件
+            if (S_ISREG(entry_stat.st_mode))
+            {
+                // 建立文件信息
+                file_info_new = (file_info_t *)malloc(sizeof(file_info_t));
+                if (file_info_new != NULL)
+                {
+                    strncpy(file_info_new->file_name, entry->d_name, strlen(entry->d_name) + 1);
+                    file_info_new->file_type = entry->d_type;
+                    file_info_new->file_size = entry_stat.st_size;
+                    file_info_new->file_msec = entry_stat.st_mtime;
+                    file_info_new->next_file = NULL;
+                }
+                // 开始排序
+                if (*file_info_list == NULL)
+                {
+                    *file_info_list = file_info_new;
+                }
+                else
+                {
+                    ESP_LOGI(TAG, "sort: %s", file_info_new->file_name);
+                    // 链表第一个
+                    file_comparison = *file_info_list;
+                    while (1)
+                    {
+                        double diff = difftime(file_info_new->file_msec, file_comparison->file_msec);
+                        ESP_LOGI(TAG, "current: %s , new: %s, diff: %f", file_comparison->file_name, file_info_new->file_name, diff);
+
+                        // 判断时间大的排后
+                        if (diff > 0)
+                        {
+                            // 下一个存在,继续对比
+                            if (file_comparison->next_file != NULL)
+                            {
+                                prev_file = file_comparison;
+                                file_comparison = file_comparison->next_file;
+                                ESP_LOGI(TAG, "find next...");
+                            }
+                            else
+                            {
+                                // 到末尾
+                                file_comparison->next_file = file_info_new;
+                                file_comparison = NULL;
+                                prev_file = NULL;
+                                ESP_LOGI(TAG, "pos right end.");
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            // 排前
+                            file_info_new->next_file = file_comparison;
+                            if (prev_file != NULL)
+                            {
+                                prev_file->next_file = file_info_new;
+                                ESP_LOGI(TAG, "pos left end.");
+                            }
+                            else
+                            {
+                                // 更新第一个
+                                *file_info_list = file_info_new;
+                                ESP_LOGI(TAG, "pos first end.");
+                            }
+                            file_comparison = NULL;
+                            prev_file = NULL;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        closedir(dir);
+    }
+}
+
+/**
+ * 带排序界面
+ */
+static esp_err_t http_resp_sort_dir_html(httpd_req_t *req, const char *dirpath)
+{
+    // 处理路径
+    char dest[FILE_PATH_MAX] = {0};
+    strncpy(dest, dirpath, strlen(dirpath) - 1);
+    ESP_LOGI(TAG, "show dest dir : %s", dest);
+    // 排序处理
+    file_info_t *file_info_list = NULL;
+    file_list_sort(dest, &file_info_list);
+    ESP_LOGI(TAG, "=== sort ok ===");
+    /* Send HTML file header */
+    httpd_resp_sendstr_chunk(req, "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head><body>");
+
+    /* Get handle to embedded file upload script */
+    extern const unsigned char upload_script_start[] asm("_binary_upload_script_html_start");
+    extern const unsigned char upload_script_end[] asm("_binary_upload_script_html_end");
+    const size_t upload_script_size = (upload_script_end - upload_script_start);
+
+    /* Add file upload form and script which on execution sends a POST request to /upload */
+    httpd_resp_send_chunk(req, (const char *)upload_script_start, upload_script_size);
+
+    /* Send file-list table definition and column labels */
+    httpd_resp_sendstr_chunk(req,
+                             "<table class=\"fixed\" border=\"1\">"
+                             "<col width=\"800px\" /><col width=\"300px\" /><col width=\"300px\" /><col width=\"100px\" />"
+                             "<thead><tr><th>Name</th><th>Type</th><th>Size (Bytes)</th><th>MTime</th><th>Delete</th></tr></thead>"
+                             "<tbody>");
+    // 查看已经排好的排序
+    file_info_t *current_file = file_info_list;
+    char entrytype[10]; // 类型
+    char str_time[64];  // 时间
+    struct tm *tm_info;
+    time_t now;
+    if (time(&now) < 0)
+        now = 946684800; // get the current time from the RTC
+    char entrysize[16];  // 文件大小
+    file_info_t *free_file = NULL;
+    while (current_file != NULL)
+    {
+        ESP_LOGI(TAG, "filename : %s", current_file->file_name);
+
+        /* Send chunk of HTML file containing table entries with file name and size */
+        httpd_resp_sendstr_chunk(req, "<tr><td><a href=\"");
+        httpd_resp_sendstr_chunk(req, req->uri);
+        httpd_resp_sendstr_chunk(req, current_file->file_name);
+
+        // 文件目录类型
+        memset(entrytype, 0, sizeof(entrytype));
+        if (current_file->file_type == DT_DIR)
+        {
+            httpd_resp_sendstr_chunk(req, "/");
+            strncpy(entrytype, "directory", strlen("directory") + 1);
+        }
+        else
+        {
+            strncpy(entrytype, "file", strlen("file") + 1);
+        }
+
+        // 最后修改时间
+        memset(str_time, 0, sizeof(str_time));
+        tm_info = localtime(&current_file->file_msec);
+        strftime(str_time, 63, "%Y-%m-%d %H:%M", tm_info);
+
+        // 文件大小
+        sprintf(entrysize, "%ld", current_file->file_size);
+
+        httpd_resp_sendstr_chunk(req, "\">");
+        httpd_resp_sendstr_chunk(req, current_file->file_name);
+        httpd_resp_sendstr_chunk(req, "</a></td><td>");
+        httpd_resp_sendstr_chunk(req, entrytype);
+        httpd_resp_sendstr_chunk(req, "</td><td>");
+        httpd_resp_sendstr_chunk(req, entrysize);
+        httpd_resp_sendstr_chunk(req, "</td><td><nobr>");
+        httpd_resp_sendstr_chunk(req, str_time);
+        httpd_resp_sendstr_chunk(req, "</nobr></td><td>");
+        httpd_resp_sendstr_chunk(req, "<form method=\"post\" action=\"/delete");
+        httpd_resp_sendstr_chunk(req, req->uri);
+        httpd_resp_sendstr_chunk(req, current_file->file_name);
+        httpd_resp_sendstr_chunk(req, "\"><button type=\"submit\">Delete</button></form>");
+        httpd_resp_sendstr_chunk(req, "</td></tr>\n");
+
+        // 释放
+        free_file = current_file;
+        current_file = current_file->next_file;
+        free(free_file);
+        free_file = NULL;
+    }
+
+    /* Finish the file list table */
+    httpd_resp_sendstr_chunk(req, "</tbody></table>");
+
+    /* Send remaining chunk of HTML file to complete it */
+    httpd_resp_sendstr_chunk(req, "</body></html>");
+
+    /* Send empty chunk to signal HTTP response completion */
+    httpd_resp_sendstr_chunk(req, NULL);
+
+    return ESP_OK;
+}
+
+/**
+ * 下面这个是官方例子，显示不带排序，重构后使用上面： http_resp_sort_dir_html
+ */
 /* Send HTTP response with a run-time generated html consisting of
  * a list of all files and folders under the requested path.
  * In case of SPIFFS this returns empty list when path is any
@@ -86,7 +315,7 @@ static esp_err_t favicon_get_handler(httpd_req_t *req)
 static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
 {
 
-    ESP_LOGI(TAG, "Call method : %s, dirpath : %s", "http_resp_dir_html", dirpath);
+    // ESP_LOGI(TAG, "Call method : %s, dirpath : %s", "http_resp_dir_html", dirpath);
 
     char entrypath[FILE_PATH_MAX];
     char entrysize[16];
@@ -131,7 +360,7 @@ static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
     httpd_resp_sendstr_chunk(req,
                              "<table class=\"fixed\" border=\"1\">"
                              "<col width=\"800px\" /><col width=\"300px\" /><col width=\"300px\" /><col width=\"100px\" />"
-                             "<thead><tr><th>Name</th><th>Type</th><th>Size (Bytes)</th><th>Delete</th></tr></thead>"
+                             "<thead><tr><th>Name</th><th>Type</th><th>Size (Bytes)</th><th>MTime</th><th>Delete</th></tr></thead>"
                              "<tbody>");
 
     /* Iterate over all files / folders and fetch their names and sizes */
@@ -146,7 +375,24 @@ static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
             continue;
         }
         sprintf(entrysize, "%ld", entry_stat.st_size);
-        ESP_LOGI(TAG, "Found %s : %s (%s bytes)", entrytype, entry->d_name, entrysize);
+        // ESP_LOGI(TAG, "Found %s : %s (%s bytes)", entrytype, entry->d_name, entrysize);
+
+        char str_time[64];
+        struct tm *tm_info;
+        time_t now;
+        if (time(&now) < 0)
+            now = 946684800;                       // get the current time from the RTC
+        tm_info = localtime(&entry_stat.st_mtime); // get broken-down file time
+
+        // if file is older than 180 days show dat,month,year else show month, day and time
+        if ((entry_stat.st_mtime + FTP_UNIX_SECONDS_180_DAYS) < now)
+        {
+            strftime(str_time, 127, "%b %d", tm_info);
+        }
+        else
+        {
+            strftime(str_time, 63, "%Y-%m-%d %H:%M", tm_info);
+        }
 
         /* Send chunk of HTML file containing table entries with file name and size */
         httpd_resp_sendstr_chunk(req, "<tr><td><a href=\"");
@@ -162,7 +408,9 @@ static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
         httpd_resp_sendstr_chunk(req, entrytype);
         httpd_resp_sendstr_chunk(req, "</td><td>");
         httpd_resp_sendstr_chunk(req, entrysize);
-        httpd_resp_sendstr_chunk(req, "</td><td>");
+        httpd_resp_sendstr_chunk(req, "</td><td><nobr>");
+        httpd_resp_sendstr_chunk(req, str_time);
+        httpd_resp_sendstr_chunk(req, "</nobr></td><td>");
         httpd_resp_sendstr_chunk(req, "<form method=\"post\" action=\"/delete");
         httpd_resp_sendstr_chunk(req, req->uri);
         httpd_resp_sendstr_chunk(req, entry->d_name);
@@ -179,6 +427,7 @@ static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
 
     /* Send empty chunk to signal HTTP response completion */
     httpd_resp_sendstr_chunk(req, NULL);
+
     return ESP_OK;
 }
 
@@ -244,7 +493,7 @@ static const char *get_path_from_uri(char *dest, const char *base_path, const ch
 /* Handler to download a file kept on the server */
 static esp_err_t download_get_handler(httpd_req_t *req)
 {
-    ESP_LOGI(TAG, "Call method : %s", "download_get_handler");
+    // ESP_LOGI(TAG, "Call method : %s", "download_get_handler");
 
     char filepath[FILE_PATH_MAX];
     FILE *fd = NULL;
@@ -264,7 +513,7 @@ static esp_err_t download_get_handler(httpd_req_t *req)
     /* If name has trailing '/', respond with directory contents */
     if (filename[strlen(filename) - 1] == '/')
     {
-        return http_resp_dir_html(req, filepath);
+        return http_resp_sort_dir_html(req, filepath);
     }
 
     if (stat(filepath, &file_stat) == -1)
@@ -517,6 +766,7 @@ static esp_err_t delete_post_handler(httpd_req_t *req)
 /* Function to start the file server */
 esp_err_t example_start_file_server(const char *base_path)
 {
+
     static struct file_server_data *server_data = NULL;
 
     if (server_data)
@@ -537,6 +787,7 @@ esp_err_t example_start_file_server(const char *base_path)
 
     httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    // config.stack_size = 1024 * 10;
 
     /* Use the URI wildcard matching function in order to
      * allow the same handler to respond to multiple different

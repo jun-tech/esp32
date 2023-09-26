@@ -9,7 +9,13 @@
     "esp_err.h": "c",
     "sdkconfig.h": "c",
     "sdmmc_cmd.h": "c",
-    "led_strip.h": "c"
+    "led_strip.h": "c",
+    "chrono": "c",
+    "condition_variable": "c",
+    "ctime": "c",
+    "mutex": "c",
+    "thread": "c",
+    "types.h": "c"
   },
   "idf.adapterTargetName": "esp32"
 }

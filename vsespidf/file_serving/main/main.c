@@ -23,6 +23,7 @@
 #include "driver/gpio.h"
 #include "esp_system.h"
 #include "led_strip.h"
+#include "app_sntp.h"
 
 #define BLINK_GPIO 2
 
@@ -59,6 +60,8 @@ void app_main(void)
      * examples/protocols/README.md for more information about this function.
      */
     ESP_ERROR_CHECK(example_connect());
+
+    app_sntp_main();
 
     /* Start the file server */
     ESP_ERROR_CHECK(example_start_file_server(base_path));
