@@ -34,6 +34,7 @@
     "*.inc": "c",
     "esp_err.h": "c",
     "stat.h": "c",
-    "unistd.h": "c"
+    "unistd.h": "c",
+    "fcntl.h": "c"
   }
 }

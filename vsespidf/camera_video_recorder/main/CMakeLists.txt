@@ -11,6 +11,7 @@ set(COMPONENT_REQUIRES
     fatfs
     avi_video_process
     jpeg2avi
+    common_utils
 )
 
 set(COMPONENT_EMBED_FILES
