@@ -13,6 +13,7 @@
 #include "Jpeg2AVI.h"
 // 组件放到idf
 #include "avi_recorder.h"
+#include "file_sort.h"
 
 #define MOUNT_POINT "/sdcard"
 
@@ -104,30 +105,61 @@ void sdcard_usage(size_t *usage)
 
 void sdcard_remove(int num)
 {
+
+    // 处理路径
+    char dest[200] = {0};
+    strncpy(dest, MOUNT_POINT, strlen(MOUNT_POINT) + 1);
+    // 排序处理
+    file_info_t *file_info_list = NULL;
+    file_list_sort(dest, &file_info_list);
+
+    // 删除计算
     int i = 0;
-    char filepath[500];
-    DIR *dir = NULL;
-    struct dirent *entry = NULL;
-    if ((dir = opendir(MOUNT_POINT)) == NULL)
+    char filepath[200];
+    file_info_t *current_file = file_info_list;
+    // 释放
+    file_info_t *free_file = NULL;
+    while (current_file != NULL)
     {
-        ESP_LOGE(TAG, "opendir failed!");
-        return;
-    }
-    else
-    {
-        while ((entry = readdir(dir)) != NULL && i < num)
+        // 删除
+        if (current_file->file_type != DT_DIR && i < num)
         {
-            // 如果是文件
-            if (entry->d_type != DT_DIR)
-            {
-                sprintf(filepath, "%s/%s", MOUNT_POINT, entry->d_name);
-                unlink(filepath);
-                i++;
-                ESP_LOGI(TAG, "file%d = %s, remove success", i, filepath);
-            }
+            sprintf(filepath, "%s/%s", MOUNT_POINT, current_file->file_name);
+            unlink(filepath);
+            i++;
+            ESP_LOGI(TAG, "file%d = %s, remove success", i, filepath);
         }
+
+        // 释放
+        free_file = current_file;
+        current_file = current_file->next_file;
+        free(free_file);
+        free_file = NULL;
     }
-    closedir(dir);
+
+    // char filepath[500];
+    // DIR *dir = NULL;
+    // struct dirent *entry = NULL;
+    // if ((dir = opendir(MOUNT_POINT)) == NULL)
+    // {
+    //     ESP_LOGE(TAG, "opendir failed!");
+    //     return;
+    // }
+    // else
+    // {
+    //     while ((entry = readdir(dir)) != NULL && i < num)
+    //     {
+    //         // 如果是文件
+    //         if (entry->d_type != DT_DIR)
+    //         {
+    //             sprintf(filepath, "%s/%s", MOUNT_POINT, entry->d_name);
+    //             unlink(filepath);
+    //             i++;
+    //             ESP_LOGI(TAG, "file%d = %s, remove success", i, filepath);
+    //         }
+    //     }
+    // }
+    // closedir(dir);
 }
 
 static int _get_frame(void **buf, size_t *len)
