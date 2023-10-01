@@ -498,4 +498,5 @@ void avi_recorder_stop(void)
         return;
     }
     g_force_end = 1;
+    g_state = REC_STATE_IDLE;
 }

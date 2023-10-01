@@ -136,30 +136,6 @@ void sdcard_remove(int num)
         free(free_file);
         free_file = NULL;
     }
-
-    // char filepath[500];
-    // DIR *dir = NULL;
-    // struct dirent *entry = NULL;
-    // if ((dir = opendir(MOUNT_POINT)) == NULL)
-    // {
-    //     ESP_LOGE(TAG, "opendir failed!");
-    //     return;
-    // }
-    // else
-    // {
-    //     while ((entry = readdir(dir)) != NULL && i < num)
-    //     {
-    //         // 如果是文件
-    //         if (entry->d_type != DT_DIR)
-    //         {
-    //             sprintf(filepath, "%s/%s", MOUNT_POINT, entry->d_name);
-    //             unlink(filepath);
-    //             i++;
-    //             ESP_LOGI(TAG, "file%d = %s, remove success", i, filepath);
-    //         }
-    //     }
-    // }
-    // closedir(dir);
 }
 
 static int _get_frame(void **buf, size_t *len)
@@ -252,6 +228,16 @@ void save_video(void *vparams)
         avi_recorder_stop();
         // 歇1分钟，不然发烫容易烧sdcard
         vTaskDelay(pdMS_TO_TICKS(60 * 1000));
+
+        printf("\n\n-------------------------------- Get Systrm Info------------------------------------------\n");
+        // 获取IDF版本
+        printf("     SDK version:%s\n", esp_get_idf_version());
+        // 获取芯片可用内存
+        printf("     esp_get_free_heap_size : %d  \n", esp_get_free_heap_size());
+        // 获取从未使用过的最小内存
+        printf("     esp_get_minimum_free_heap_size : %d  \n", esp_get_minimum_free_heap_size());
+        // 获取芯片的内存分布，返回值具体见结构体 flash_size_map
+        // printf("     system_get_flash_size_map(): %d \n", system_get_flash_size_map());
     }
 
     vTaskDelete(NULL);
