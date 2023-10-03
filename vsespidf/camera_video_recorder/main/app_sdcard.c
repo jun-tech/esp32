@@ -171,6 +171,7 @@ esp_err_t get_video_size(int *w, int *h)
         ESP_LOGE(TAG, "Camera capture failed");
         *w = resolution[FRAMESIZE_QSXGA].width;
         *h = resolution[FRAMESIZE_QSXGA].height;
+        vTaskDelay(pdMS_TO_TICKS(3 * 1000));
         return ESP_FAIL;
     }
     else
@@ -238,6 +239,75 @@ void save_video(void *vparams)
         printf("     esp_get_minimum_free_heap_size : %d  \n", esp_get_minimum_free_heap_size());
         // 获取芯片的内存分布，返回值具体见结构体 flash_size_map
         // printf("     system_get_flash_size_map(): %d \n", system_get_flash_size_map());
+    }
+
+    vTaskDelete(NULL);
+}
+
+void save_video2(void *vparams)
+{
+    int video_w = 0;
+    int video_h = 0;
+    // 时间戳
+    time_t now;
+    char fname[64];
+    struct tm *timeinfo;
+
+    while (1)
+    {
+        time(&now);
+        timeinfo = localtime(&now);
+        strftime(fname, 80, MOUNT_POINT "/record_%Y%m%d_%H%M.avi", timeinfo);
+        // 保存视频
+        esp_err_t flag = get_video_size(&video_w, &video_h);
+        if (flag == ESP_OK)
+        {
+            ESP_LOGI(TAG, "record video w=%d, h=%d", video_w, video_h);
+        }
+        else
+        {
+            // 报错
+            continue;
+        }
+        // 统计下已用
+        size_t total = 1024 * 1024 * 1024 * 1; // 1G
+        size_t usage = 0;
+        sdcard_usage(&usage);
+        ESP_LOGI(TAG, "usage %d(Bytes), total %d(Bytes)", usage, total);
+        if (usage > 0)
+        {
+            // 超过70%, 删除20个
+            float precent = ((float)usage * 100) / (float)total;
+            ESP_LOGI(TAG, "usage %.2f(Precent)", precent);
+            if (precent > 70)
+            {
+                sdcard_remove(20);
+            }
+        }
+
+        int i = 0;
+        FILE *f = fopen(fname, "wb");
+        jpeg2avi_start(f);
+        ESP_LOGI(TAG, "save_video start");
+        while (1)
+        {
+            camera_fb_t *fb = esp_camera_fb_get();
+            jpeg2avi_add_frame(f, fb->buf, fb->len);
+            // ESP_LOGI(TAG, "save_video one frame");
+            esp_camera_fb_return(fb);
+            // fps 10
+            if (i > 600)
+            {
+                jpeg2avi_end(f, video_w, video_h, 10);
+                fclose(f);
+                ESP_LOGI(TAG, "save_video end");
+                break;
+            }
+            i++;
+        }
+        ESP_LOGI(TAG, "save_video ok");
+        // 歇1分钟，不然发烫容易烧sdcard
+        vTaskDelay(pdMS_TO_TICKS(60 * 1000));
     }
 
     vTaskDelete(NULL);
@@ -313,7 +383,8 @@ void app_sdcard_main()
     // 查看sdcard文件
     // show_sdcard_files_info(card);
     // 保存视频
-    xTaskCreate(save_video, "saveVideo", 1024 * 5, (void *)card, 1, NULL);
+    // xTaskCreate(save_video2, "saveVideo", 1024 * 5, (void *)card, 1, NULL);
+    xTaskCreatePinnedToCore(save_video2, "saveVideo", 1024 * 5, (void *)card, configMAX_PRIORITIES - 2, NULL, 1);
 
     // All done, unmount partition and disable SDMMC peripheral
     // esp_vfs_fat_sdcard_unmount(mount_point, card);
