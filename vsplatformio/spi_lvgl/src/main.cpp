@@ -19,9 +19,6 @@ static const uint16_t screenHeight = TFT_HEIGHT;
 TFT_eSPI tft = TFT_eSPI(screenWidth, screenHeight); /* TFT instance */
 XPT2046_Touchscreen ts(TOUCH_CS);                   // Param 2 - NULL - No interrupts
 
-// 超频300M
-#define PLL_SYS_KHZ (300 * 1000)
-
 void touch_xpt2046_init(void)
 {
   ts.begin();
@@ -43,17 +40,19 @@ void my_disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *c
   uint32_t w = (area->x2 - area->x1 + 1);
   uint32_t h = (area->y2 - area->y1 + 1);
 
+  // 非DMA渲染
   tft.startWrite();
   tft.setAddrWindow(area->x1, area->y1, w, h);
-  // 非DMA渲染
   tft.pushColors((uint16_t *)&color_p->full, w * h, true);
+  tft.endWrite();
   // DMA渲染 begin
+  // tft.startWrite();
   // tft.setSwapBytes(true); // LV_COLOR_16_SWAP 也可以在这里设为1，此行就可以注释掉
   // tft.pushPixelsDMA((uint16_t *)&color_p->full, w * h);
-  // tft.pushImage(area->x1, area->y1, w, h, (uint16_t *)&color_p->full);
+  // // tft.pushImageDMA(area->x1, area->y1, w, h, (uint16_t *)&color_p->full);
+  // // tft.dmaWait();
+  // tft.endWrite();
   // DMA渲染 end
-  tft.endWrite();
-
   lv_disp_flush_ready(disp_drv);
 }
 
@@ -118,7 +117,7 @@ void setup()
 
   tft.begin();        /* TFT init */
   tft.setRotation(1); /* Landscape orientation, flipped */
-  // tft.initDMA();
+  tft.initDMA();
 
   //   /*Set the touchscreen calibration data,
   //    the actual data for your display can be acquired using

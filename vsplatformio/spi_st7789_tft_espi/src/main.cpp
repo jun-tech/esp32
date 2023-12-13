@@ -11,17 +11,24 @@ int i = 0;
 int n = 0;
 
 static void displaySomething();
+static void setupSomething();
+static void testDmaClear();
 
 void setup()
 {
-  Serial.begin(115200); /* prepare for possible serial debug */
-  tft.begin();          /* TFT init */
-  tft.setRotation(1);   /* Landscape orientation */
+  Serial.begin(115200);
+  setupSomething();
+  // testDmaClear();
+}
+
+static void setupSomething()
+{
+  tft.begin();        /* TFT init */
+  tft.setRotation(1); /* Landscape orientation */
+  tft.fillScreen(TFT_WHITE);
   // 显示图片
   tft.setSwapBytes(true);
   tft.pushImage(0, 0, 240, 240, gImage_my_img);
-  delay(5000);
-  tft.fillScreen(TFT_WHITE);
   // 打印屏配置宽高
   Serial.printf("w: %d, h: %d \r\n", tft.width(), tft.height());
 }
@@ -55,9 +62,42 @@ void displaySomething()
   delay(10);
 }
 
+void testDmaClear()
+{
+
+  Serial.begin(115200);
+
+  tft.begin();
+  tft.initDMA();
+  tft.setRotation(1);
+
+  int startTime = micros();
+
+  for (int i = 0; i < 50; i++)
+  {
+    tft.fillScreen(TFT_RED);
+    tft.fillScreen(TFT_GREEN);
+    tft.fillScreen(TFT_BLUE);
+  }
+
+  int drawTime = micros() - startTime;
+
+#ifdef ESP32_DMA
+  log_d("ESP32 DMA enabled");
+#else
+  log_d("ESP32 DMA not enabled");
+#endif
+
+  Serial.println("Hello from Arduino!");
+  Serial.printf("TFT w,h: %d,%d\r\n", tft.width(), tft.height());
+  Serial.print("Draw time was: ");
+  Serial.print(drawTime);
+  Serial.println(" microseconds.");
+}
+
 void loop()
 {
   // 窗体上显示一些东西
-  displaySomething();
+  // displaySomething();
   delay(5);
 }

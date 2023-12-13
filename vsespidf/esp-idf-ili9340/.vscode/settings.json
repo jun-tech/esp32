@@ -1,0 +1,15 @@
+{
+    "idf.port": "/dev/ttyUSB1",
+    "idf.adapterTargetName": "esp32",
+    "idf.openOcdConfigs": [
+        "board/esp32-bridge.cfg"
+    ],
+    "idf.flashType": "UART",
+    "files.associations": {
+        "fontx.h": "c",
+        "pngle.h": "c",
+        "decode_png.h": "c",
+        "tjpgd.h": "c",
+        "decode_jpeg.h": "c"
+    }
+}
