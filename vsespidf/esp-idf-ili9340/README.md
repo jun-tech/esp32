@@ -64,7 +64,7 @@ You have to set this config value with menuconfig.
 - CONFIG_RESET_GPIO   
 - CONFIG_BL_GPIO   
  __GPIO of ESP32 cannot supply too much current.__   
- __TFT backlight becomes brighter when powered by an external power source.__   
+  __TFT backlight becomes brighter when powered by an external power source.__   
 
 __TFT MISO is not use.__   
 
@@ -392,22 +392,22 @@ XPT2046 and HR2046 are very similar. But HR2046 does not work properly.
 ![XPT2046-2](https://user-images.githubusercontent.com/6020549/144332571-717f33b1-df03-4a0a-9a23-c7c99b9d4d32.JPG)
 
 
-### Wirering for XPT2046  
+### Wirering for XPT2046  (接线参考)
 
 |TFT||ESP32|ESP32-S2/S3|ESP32-C2/C3||
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |VCC|--|3.3V|3.3V|3V3||
 |GND|--|GND|GND|GND||
-|CS|--|GPIO14|GPIO34|GPIO2||
-|RES|--|GPIO33|GPIO41|GPIO4|(*1)|
-|D/C|--|GPIO27|GPIO40|GPIO3|(*1)|
-|MOSI|--|GPIO23|GPIO35|GPIO0|(*1) (*2)|
-|SCK|--|GPIO18|GPIO36|GPIO1|(*1) (*2)|
+|CS|--|GPIO14/GPIO5|GPIO34|GPIO2||
+|RES|--|GPIO33/GPIO22|GPIO41|GPIO4|(*1)|
+|D/C|--|GPIO27/GPIO21|GPIO40|GPIO3|(*1)|
+|MOSI|--|**GPIO23**|GPIO35|GPIO0|(*1) (*2)|
+|SCK|--|**GPIO18**|GPIO36|GPIO1|(*1) (*2)|
 |LED|--|3.3V|3.3V|3.3V|(*1) (*3)|
 |MISO|--|N/C|N/C|N/C||
-|T_CLK|--|GPIO18|GPIO36|GPIO1|(*1) (*2)|
+|T_CLK|--|**GPIO18**|GPIO36|GPIO1|(*1) (*2)|
 |T_CS|--|GPIO21|GPIO38|GPIO7|(*1) (*4)|
-|T_DIN|--|GPIO23|GPIO35|GPIO0|(*1) (*2)|
+|T_DIN|--|**GPIO23**|GPIO35|GPIO0|(*1) (*2)|
 |T_OUT|--|GPIO19|GPIO37|GPIO6|(*1) (*2)|
 |T_IRQ|--|GPIO22|GPIO39|GPIO8|(*1) (*4)|
 
