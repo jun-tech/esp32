@@ -32,6 +32,8 @@
 
 ​		或者勾选后选26MHz（FPS实测有点低，实际才7fps），按理vspi接口达到40Mhz-80MHz，但出现花屏或重启，调低频率
 
+​		Set IRAM as LV_ATTRIBUTE_FAST_MEM，勾上提升fps
+
 8、Other/Show CPU usage and FPS count. 勾选显示fps
 
 9、Demos，你可以勾选一些测试程序
