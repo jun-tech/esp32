@@ -1,83 +1,88 @@
-| Supported Targets | ESP32 | ESP32-S2 | ESP32-S3 |
-| ----------------- | ----- | -------- | -------- |
-# LVGL porting example
+# 创建工程
 
-LVGL is an open-source graphics library for creating modern GUIs. It has plenty of built-in graphical elements with low memory footprint, which is friendly for embedded GUI applications.
+1、打开vscode，F1从模板创建，选hello_world创建
 
-This example can be taken as a skeleton of porting the LVGL library onto the `esp_lcd` driver layer. **Note** that, this example only focuses on the display interface, regardless of the input device driver.
+2、example_hello.main修改成lvgl_main.c
 
-The whole porting code is located in [this main file](main/lvgl_example_main.c), and the UI demo code is located in [another single file](main/lvgl_demo_ui.c).
+3、project(lvgl_demo)
 
-The UI will display two images (one Espressif logo and another Espressif text), which have been converted into C arrays by the [online converting tool](https://lvgl.io/tools/imageconverter), and will be compiled directly into application binary.
-
-This example is constructed by [IDF component manager](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/idf-component-manager.html), all the external dependency will be handled by the CMake build system automatically. In this case, it will help download the lvgl from [registry](https://components.espressif.com/component/lvgl/lvgl), with the version specified in the [manifest file](main/idf_component.yml).
-
-This example uses the [esp_timer](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/esp_timer.html) to generate the ticks needed by LVGL. For more porting guides, please refer to [LVGL porting doc](https://docs.lvgl.io/master/porting/index.html).
-
-## How to use the example
-
-### Hardware Required
-
-* An ESP development board
-* An Intel 8080 interfaced (so called MCU interface or parallel interface) LCD
-* An USB cable for power supply and programming
-
-### Hardware Connection
-
-The connection between ESP Board and the LCD is as follows:
-
-```
-   ESP Board                      LCD Screen
-┌─────────────┐              ┌────────────────┐
-│             │              │                │
-│         3V3 ├─────────────►│ VCC            │
-│             │              │                │
-│         GND ├──────────────┤ GND            │
-│             │              │                │
-│  DATA[0..7] │◄────────────►│ DATA[0..7]     │
-│             │              │                │
-│        PCLK ├─────────────►│ PCLK           │
-│             │              │                │
-│          CS ├─────────────►│ CS             │
-│             │              │                │
-│         D/C ├─────────────►│ D/C            │
-│             │              │                │
-│         RST ├─────────────►│ RST            │
-│             │              │                │
-│    BK_LIGHT ├─────────────►│ BCKL           │
-│             │              │                │
-└─────────────┘              └────────────────┘
-```
-
-The GPIO number used by this example can be changed in [lvgl_example_main.c](main/lvgl_example_main.c).
-Especially, please pay attention to the level used to turn on the LCD backlight, some LCD module needs a low level to turn it on, while others take a high level. You can change the backlight level macro `EXAMPLE_LCD_BK_LIGHT_ON_LEVEL` in [lvgl_example_main.c](main/lvgl_example_main.c).
-
-### Build and Flash
-
-Run `idf.py -p PORT build flash monitor` to build, flash and monitor the project. A fancy animation will show up on the LCD as expected.
-
-The first time you run `idf.py` for the example will cost extra time as the build system needs to address the component dependencies and downloads the missing components from registry into `managed_components` folder.
-
-(To exit the serial monitor, type ``Ctrl-]``.)
-
-See the [Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html) for full steps to configure and use ESP-IDF to build projects.
-
-### Example Output
-
-```bash
-I (0) cpu_start: Starting scheduler on APP CPU.
-I (418) example: Turn off LCD backlight
-I (418) gpio: GPIO[2]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0
-I (428) example: Initialize Intel 8080 bus
-I (438) example: Install LCD driver of st7789
-I (558) example: Turn on LCD backlight
-I (558) example: Initialize LVGL library
-I (558) example: Register display driver to LVGL
-I (558) example: Install LVGL tick timer
-I (558) example: Display LVGL animation
-```
+4、新建components
 
 
-## Troubleshooting
 
-For any technical queries, please open an [issue] (https://github.com/espressif/esp-idf/issues) on GitHub. We will get back to you soon.
+# 集成LVGL
+
+采用lvgl8.3.11，较稳定
+
+1、https://github.com/lvgl/lvgl/tree/v8.3.11
+
+2、https://github.com/lvgl/lvgl_esp32_drivers
+
+3、解压到components，**先vscode编译下**，sdkconfig将出现LVGL configuration、LVGL ESP Drivers
+
+4、main/CMakeLists.txt修改，REQUIRES lvgl_esp32_drivers lvgl
+
+5、sdkconfig配置Enable the examples to be built先去掉勾
+
+6、Select predefined board pinouts、选esp-30pin开发板
+
+7、Select a display controller model，驱动选ili9481(我的屏是st7796，使用st7796s不成功)
+
+​	   TFT SPI Duplex Mode，选HALF DUPLEX（半双工），去掉勾选Use custom SPI clock frequency.
+
+8、Other/Show CPU usage and FPS count. 勾选显示fps
+
+9、Demos，你可以勾选一些测试程序
+
+10、接线配置
+
+|     TFT     |      |   ESP32    | ESP32-S2/S3 | ESP32-C2/C3 |           |
+| :---------: | :--: | :--------: | :---------: | :---------: | :-------: |
+|     VCC     |  --  |    3.3V    |    3.3V     |     3V3     |           |
+|     GND     |  --  |    GND     |     GND     |     GND     |           |
+|     CS      |  --  |   GPIO15   |   GPIO34    |    GPIO2    |           |
+|    REST     |  --  |   GPIO33   |   GPIO41    |    GPIO4    |   (*1)    |
+|     D/C     |  --  |   GPIO27   |   GPIO40    |    GPIO3    |   (*1)    |
+|    MOSI     |  --  | **GPIO13** |   GPIO35    |    GPIO0    | (*1) (*2) |
+|     SCK     |  --  | **GPIO14** |   GPIO36    |    GPIO1    | (*1) (*2) |
+| LED（背光） |  --  |    3.3V    |    3.3V     |    3.3V     | (*1) (*3) |
+|    MISO     |  --  |    N/C     |     N/C     |     N/C     |           |
+|    T_CLK    |  --  | **GPIO14** |   GPIO36    |    GPIO1    | (*1) (*2) |
+|    T_CS     |  --  |   GPIO21   |   GPIO38    |    GPIO7    | (*1) (*4) |
+|    T_DIN    |  --  | **GPIO13** |   GPIO35    |    GPIO0    | (*1) (*2) |
+|    T_OUT    |  --  |   GPIO19   |   GPIO37    |    GPIO6    | (*1) (*2) |
+|    T_IRQ    |  --  |   GPIO22   |   GPIO39    |    GPIO8    |           |
+
+
+
+# 编译修复错误
+
+1、mean 'LV_HOR_RES'?
+ #define DISP_BUF_SIZE  (LV_HOR_RES_MAX * 40)
+
+- [ ] lvgl_esp32_drivers/lvgl_helpers.h缺少这两个宏定义，加上
+
+  #define LV_HOR_RES_MAX 320
+  #define LV_VER_RES_MAX 480
+
+2、ean 'GPIO_PORT_MAX'?
+     assert((0 <= host) && (SPI_HOST_MAX > host));
+
+直接定位注释掉
+
+3、E (432) spi_hal: spi_hal_cal_clock_conf(102): When work in full-duplex mode at frequency > 26.7MHz, device cannot read correct data.
+Try to use IOMUX pins to increase the frequency limit, or use the half duplex mode.
+Please note the SPI master can only work at divisors of 80MHz, and the driver always tries to find the closest frequency to your configuration.
+
+直接降频或接线重接，查看官方文档仅仅指定GPIO适合40-80MHz
+
+https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/spi_master.html#gpio-matrix-and-iomux
+
+| Pin Name | SPI 2 (GPIO Number) HSPI | SPI 3 (GPIO Number) VSPI |
+| :------: | :----------------------: | :----------------------: |
+|    CS    |            15            |            5             |
+|   SCLK   |            14            |            18            |
+|   MISO   |            12            |            19            |
+|   MOSI   |            13            |            23            |
+|  QUADWP  |            2             |            22            |
+|  QUADHD  |            4             |            21            |
