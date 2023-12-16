@@ -17,17 +17,18 @@
 /*********************
  *      DEFINES
  *********************/
- #define TAG "ILI9481"
+#define TAG "ILI9481"
 
 /**********************
  *      TYPEDEFS
  **********************/
 
 /*The LCD needs a bunch of command/argument values to be initialized. They are stored in this struct. */
-typedef struct {
+typedef struct
+{
     uint8_t cmd;
     uint8_t data[16];
-    uint8_t databytes; //No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
+    uint8_t databytes; // No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
 } lcd_init_cmd_t;
 
 /**********************
@@ -36,8 +37,8 @@ typedef struct {
 
 static void ili9481_set_orientation(uint8_t orientation);
 static void ili9481_send_cmd(uint8_t cmd);
-static void ili9481_send_data(void * data, uint16_t length);
-static void ili9481_send_color(void * data, uint16_t length);
+static void ili9481_send_data(void *data, uint16_t length);
+static void ili9481_send_color(void *data, uint16_t length);
 
 /**********************
  *  STATIC VARIABLES
@@ -53,7 +54,7 @@ static void ili9481_send_color(void * data, uint16_t length);
 
 void ili9481_init(void)
 {
-    lcd_init_cmd_t ili_init_cmds[]={
+    lcd_init_cmd_t ili_init_cmds[] = {
         {ILI9481_CMD_SLEEP_OUT, {0x00}, 0x80},
         {ILI9481_CMD_POWER_SETTING, {0x07, 0x42, 0x18}, 3},
         {ILI9481_CMD_VCOM_CONTROL, {0x00, 0x07, 0x10}, 3},
@@ -73,7 +74,24 @@ void ili9481_init(void)
         {0, {0}, 0xff},
     };
 
-    //Initialize non-SPI GPIOs
+    // lcd_init_cmd_t ili_init_cmds[] = {
+    //     {0xC0, {0x10, 0x10}, 2},
+    //     {0xC1, {0x41}, 1},
+    //     {0xC5, {0x00, 0x22, 0x80, 0x40}, 4},
+    //     {0x36, {0x48}, 1},
+    //     {0xB0, {0x00}, 1},
+    //     {0xB1, {0xB0, 0x11}, 2},
+    //     {0xB4, {0x02}, 1},
+    //     {0xB6, {0x02, 0x02, 0x3B}, 3},
+    //     {0xB7, {0xC6}, 1},
+    //     {0x3A, {0x55}, 1},
+    //     {0xF7, {0xA9, 0x51, 0x2C, 0x82}, 4},
+    //     {0x11, {}, 0x80},
+    //     {0x29, {}, 0x80},
+    //     {0, {0}, 0xff},
+    // };
+
+    // Initialize non-SPI GPIOs
     gpio_pad_select_gpio(ILI9481_DC);
     gpio_set_direction(ILI9481_DC, GPIO_MODE_OUTPUT);
 
@@ -81,7 +99,7 @@ void ili9481_init(void)
     gpio_pad_select_gpio(ILI9481_RST);
     gpio_set_direction(ILI9481_RST, GPIO_MODE_OUTPUT);
 
-    //Reset the display
+    // Reset the display
     gpio_set_level(ILI9481_RST, 0);
     vTaskDelay(100 / portTICK_RATE_MS);
     gpio_set_level(ILI9481_RST, 1);
@@ -91,15 +109,17 @@ void ili9481_init(void)
     ESP_LOGI(TAG, "ILI9481 initialization.");
 
     // Exit sleep
-    ili9481_send_cmd(0x01);	/* Software reset */
+    ili9481_send_cmd(0x01); /* Software reset */
     vTaskDelay(100 / portTICK_RATE_MS);
 
-    //Send all the commands
+    // Send all the commands
     uint16_t cmd = 0;
-    while (ili_init_cmds[cmd].databytes!=0xff) {
+    while (ili_init_cmds[cmd].databytes != 0xff)
+    {
         ili9481_send_cmd(ili_init_cmds[cmd].cmd);
-        ili9481_send_data(ili_init_cmds[cmd].data, ili_init_cmds[cmd].databytes&0x1F);
-        if (ili_init_cmds[cmd].databytes & 0x80) {
+        ili9481_send_data(ili_init_cmds[cmd].data, ili_init_cmds[cmd].databytes & 0x1F);
+        if (ili_init_cmds[cmd].databytes & 0x80)
+        {
             vTaskDelay(100 / portTICK_RATE_MS);
         }
         cmd++;
@@ -109,44 +129,47 @@ void ili9481_init(void)
 }
 
 // Flush function based on mvturnho repo
-void ili9481_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
+void ili9481_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map)
 {
     uint32_t size = lv_area_get_width(area) * lv_area_get_height(area);
 
-    lv_color16_t *buffer_16bit = (lv_color16_t *) color_map;
+    lv_color16_t *buffer_16bit = (lv_color16_t *)color_map;
     uint8_t *mybuf;
-    do {
-        mybuf = (uint8_t *) heap_caps_malloc(3 * size * sizeof(uint8_t), MALLOC_CAP_DMA);
-        if (mybuf == NULL)  ESP_LOGW(TAG, "Could not allocate enough DMA memory!");
+    do
+    {
+        mybuf = (uint8_t *)heap_caps_malloc(3 * size * sizeof(uint8_t), MALLOC_CAP_DMA);
+        if (mybuf == NULL)
+            ESP_LOGW(TAG, "Could not allocate enough DMA memory!");
     } while (mybuf == NULL);
 
     uint32_t LD = 0;
     uint32_t j = 0;
 
-    for (uint32_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++)
+    {
         LD = buffer_16bit[i].full;
-        mybuf[j] = (uint8_t) (((LD & 0xF800) >> 8) | ((LD & 0x8000) >> 13));
+        mybuf[j] = (uint8_t)(((LD & 0xF800) >> 8) | ((LD & 0x8000) >> 13));
         j++;
-        mybuf[j] = (uint8_t) ((LD & 0x07E0) >> 3);
+        mybuf[j] = (uint8_t)((LD & 0x07E0) >> 3);
         j++;
-        mybuf[j] = (uint8_t) (((LD & 0x001F) << 3) | ((LD & 0x0010) >> 2));
+        mybuf[j] = (uint8_t)(((LD & 0x001F) << 3) | ((LD & 0x0010) >> 2));
         j++;
     }
 
     /* Column addresses  */
     uint8_t xb[] = {
-        (uint8_t) (area->x1 >> 8) & 0xFF,
-        (uint8_t) (area->x1) & 0xFF,
-        (uint8_t) (area->x2 >> 8) & 0xFF,
-        (uint8_t) (area->x2) & 0xFF,
+        (uint8_t)(area->x1 >> 8) & 0xFF,
+        (uint8_t)(area->x1) & 0xFF,
+        (uint8_t)(area->x2 >> 8) & 0xFF,
+        (uint8_t)(area->x2) & 0xFF,
     };
 
     /* Page addresses  */
     uint8_t yb[] = {
-        (uint8_t) (area->y1 >> 8) & 0xFF,
-        (uint8_t) (area->y1) & 0xFF,
-        (uint8_t) (area->y2 >> 8) & 0xFF,
-        (uint8_t) (area->y2) & 0xFF,
+        (uint8_t)(area->y1 >> 8) & 0xFF,
+        (uint8_t)(area->y1) & 0xFF,
+        (uint8_t)(area->y2 >> 8) & 0xFF,
+        (uint8_t)(area->y2) & 0xFF,
     };
 
     /*Column addresses*/
@@ -160,7 +183,7 @@ void ili9481_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
     /*Memory write*/
     ili9481_send_cmd(ILI9481_CMD_MEMORY_WRITE);
 
-    ili9481_send_color((void *) mybuf, size * 3);
+    ili9481_send_color((void *)mybuf, size * 3);
     heap_caps_free(mybuf);
 }
 
@@ -168,37 +191,35 @@ void ili9481_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
  *   STATIC FUNCTIONS
  **********************/
 
-
 static void ili9481_send_cmd(uint8_t cmd)
 {
     disp_wait_for_pending_transactions();
-    gpio_set_level(ILI9481_DC, 0);	 /*Command mode*/
+    gpio_set_level(ILI9481_DC, 0); /*Command mode*/
     disp_spi_send_data(&cmd, 1);
 }
 
-static void ili9481_send_data(void * data, uint16_t length)
+static void ili9481_send_data(void *data, uint16_t length)
 {
     disp_wait_for_pending_transactions();
-    gpio_set_level(ILI9481_DC, 1);	 /*Data mode*/
+    gpio_set_level(ILI9481_DC, 1); /*Data mode*/
     disp_spi_send_data(data, length);
 }
 
-static void ili9481_send_color(void * data, uint16_t length)
+static void ili9481_send_color(void *data, uint16_t length)
 {
     disp_wait_for_pending_transactions();
-    gpio_set_level(ILI9481_DC, 1);   /*Data mode*/
+    gpio_set_level(ILI9481_DC, 1); /*Data mode*/
     disp_spi_send_colors(data, length);
 }
 
 static void ili9481_set_orientation(uint8_t orientation)
 {
     const char *orientation_str[] = {
-        "PORTRAIT", "PORTRAIT_INVERTED", "LANDSCAPE", "LANDSCAPE_INVERTED"
-    };
+        "PORTRAIT", "PORTRAIT_INVERTED", "LANDSCAPE", "LANDSCAPE_INVERTED"};
 
     ESP_LOGI(TAG, "Display orientation: %s", orientation_str[orientation]);
 
     uint8_t data[] = {0x48, 0x4B, 0x28, 0x2B};
     ili9481_send_cmd(ILI9481_CMD_MEMORY_ACCESS_CONTROL);
-    ili9481_send_data((void *) &data[orientation], 1);
+    ili9481_send_data((void *)&data[orientation], 1);
 }

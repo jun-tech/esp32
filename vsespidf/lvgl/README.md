@@ -54,8 +54,10 @@
 |    T_CLK    |  --  | **GPIO14** |   GPIO36    |    GPIO1    | (*1) (*2) |
 |    T_CS     |  --  |   GPIO21   |   GPIO38    |    GPIO7    | (*1) (*4) |
 |    T_DIN    |  --  | **GPIO13** |   GPIO35    |    GPIO0    | (*1) (*2) |
-|    T_OUT    |  --  |   GPIO19   |   GPIO37    |    GPIO6    | (*1) (*2) |
+|    T_OUT    |  --  |   GPIO12   |   GPIO37    |    GPIO6    | (*1) (*2) |
 |    T_IRQ    |  --  |   GPIO22   |   GPIO39    |    GPIO8    |           |
+
+配置xpt2046共用spi设置-1，实际物理接线按上表配置
 
 
 
@@ -90,3 +92,19 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/periph
 |   MOSI   |            13            |            23            |
 |  QUADWP  |            2             |            22            |
 |  QUADHD  |            4             |            21            |
+
+
+
+# 提升FPS
+
+1、配置ESP32-specific，CPU frequency设置240MHz，原fps14提升到fps16
+
+2、配置Serial flasher config，Flash SPI mode原DIO设置QIO，Flash SPI speed原40Mhz设置80Mhz，原fps16提升到fps18
+
+3、配置Compiler options，原-DebugOg改-O2；原fps18提升到fps20
+
+4、配置Bootloader config，原-Os改-O2（此项配置后编译不通过，可选）；配置Partition Table
+
+5、
+
+​	 

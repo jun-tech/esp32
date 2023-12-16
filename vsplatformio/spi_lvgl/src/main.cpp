@@ -94,6 +94,32 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data)
   }
 }
 
+void lvgl_bg_color_test(void)
+{
+  // base bg color
+  static lv_style_t style;
+  lv_style_init(&style);
+  // lv_style_set_bg_color(&style, lv_palette_lighten(LV_PALETTE_RED, 1));// 颜色纯度
+  lv_style_set_bg_color(&style, lv_palette_main(LV_PALETTE_RED)); // 单色
+
+  lv_obj_t *obj = lv_obj_create(lv_scr_act()); // 创建对象
+  lv_obj_add_style(obj, &style, 0);            // 设置对象的样式
+  lv_obj_set_size(obj, screenWidth / 3, screenHeight);
+  lv_obj_set_pos(obj, 0, 0);
+
+  lv_obj_t *obj1 = lv_obj_create(lv_scr_act());                          // 创建对象
+  lv_obj_add_style(obj1, &style, 0);                                     // 设置对象的样式
+  lv_obj_set_style_bg_color(obj1, lv_palette_main(LV_PALETTE_GREEN), 0); // 单色
+  lv_obj_set_size(obj1, screenWidth / 3, screenHeight);
+  lv_obj_set_pos(obj1, screenWidth / 3, 0);
+
+  lv_obj_t *obj2 = lv_obj_create(lv_scr_act());                         // 创建对象
+  lv_obj_add_style(obj2, &style, 0);                                    // 设置对象的样式
+  lv_obj_set_style_bg_color(obj2, lv_palette_main(LV_PALETTE_BLUE), 0); // 单色
+  lv_obj_set_size(obj2, screenWidth / 3, screenHeight);
+  lv_obj_set_pos(obj2, (screenWidth / 3) * 2, 0);
+}
+
 void setup()
 {
   // 超频测试
@@ -186,8 +212,10 @@ void setup()
   // lv_demo_music();
   // lv_demo_printer();
   // 以下2案例性能测试
-  lv_demo_benchmark();
+  // lv_demo_benchmark();
   // lv_demo_stress();
+  // 颜色纯度测试
+  lvgl_bg_color_test();
 
   Serial.println("Setup done");
 }
