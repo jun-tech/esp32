@@ -59,9 +59,7 @@
 |    T_OUT    |  --  |   GPIO12   |   GPIO37    |    GPIO6    | (*1) (*2) |
 |    T_IRQ    |  --  |   GPIO22   |   GPIO39    |    GPIO8    |           |
 
-配置xpt2046共用spi设置-1，实际物理接线按上表配置
-
-
+Swap XY.选项去掉打勾	Invert X coordinate value.选项去掉打勾	Invert Y coordinate value.选项打勾
 
 # 编译修复错误
 
@@ -107,6 +105,8 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/periph
 
 ​		components/lvgl_esp32_drivers/lvgl_tft/st7796s.c中116行已经存在此判断，所以增加配置，进行配置即可
 
+
+
 # 提升FPS
 
 1、配置ESP32-specific，CPU frequency设置240MHz，原fps14提升到fps16
@@ -119,4 +119,6 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/periph
 
 5、Swap the 2 bytes of RGB565 color. Useful if the display has an 8-bit interface (e.g. SPI).提升到fps31
 
-​	 
+6、HAL Settings-Default display refresh period (ms).	 配置FPS，10000/x，得出帧数。配10，即100FPS，实际上只测到极限达到fps32
+
+7、使用hspi，spi频率40MHz，fps45，项目使用足够了；spi频率80MHz，fps97，很夸张，存在花屏现象，所以只作测试使用

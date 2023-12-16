@@ -28,12 +28,12 @@ static void gui_demo()
 {
     // lvgl_bg_color_test();
     // lvgl_test();
-    // lv_demo_widgets();
+    lv_demo_widgets();
     // lv_demo_keypad_encoder();
     // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    lv_demo_benchmark();
+    // lv_demo_benchmark();
     // lv_demo_stress();
 }
 
@@ -55,7 +55,25 @@ static void gui_task(void *arg)
     disp_drv.flush_cb = disp_driver_flush; /*Set a flush callback to draw to the display*/
     disp_drv.hor_res = LV_HOR_RES_MAX;     /*Set the horizontal resolution in pixels*/
     disp_drv.ver_res = LV_VER_RES_MAX;     /*Set the vertical resolution in pixels*/
-    lv_disp_drv_register(&disp_drv);       /*Register the driver and save the created display objects*/
+
+    /* When using a monochrome display we need to register the callbacks:
+     * - rounder_cb
+     * - set_px_cb */
+#ifdef CONFIG_LV_TFT_DISPLAY_MONOCHROME
+    disp_drv.rounder_cb = disp_driver_rounder;
+    disp_drv.set_px_cb = disp_driver_set_px;
+#endif
+    lv_disp_drv_register(&disp_drv); /*Register the driver and save the created display objects*/
+
+    /* Register an input device when enabled on the menuconfig */
+#if CONFIG_LV_TOUCH_CONTROLLER != TOUCH_CONTROLLER_NONE
+    lv_indev_drv_t indev_drv;
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.read_cb = touch_driver_read;
+    indev_drv.type = LV_INDEV_TYPE_POINTER;
+    lv_indev_drv_register(&indev_drv);
+#endif
+
     esp_register_freertos_tick_hook((void *)lv_tick_task);
 
     gui_demo();
@@ -72,6 +90,13 @@ static void gui_task(void *arg)
             xSemaphoreGive(xGuiSemaphore);
         }
     }
+
+    /* A task should NEVER return */
+    free(buf1);
+#ifndef CONFIG_LV_TFT_DISPLAY_MONOCHROME
+    free(buf2);
+#endif
+    vTaskDelete(NULL);
 }
 
 void lvgl_bg_color_test(void)
@@ -122,5 +147,5 @@ void lvgl_test(void)
 // 主函数
 void app_main(void)
 {
-    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 3, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 4, NULL, 1, NULL, 0);
 }
