@@ -117,6 +117,6 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/periph
 
 4、配置Bootloader config，原-Os改-O2（此项配置后编译不通过，可选）；配置Partition Table
 
-5、
+5、Swap the 2 bytes of RGB565 color. Useful if the display has an 8-bit interface (e.g. SPI).提升到fps31
 
 ​	 
