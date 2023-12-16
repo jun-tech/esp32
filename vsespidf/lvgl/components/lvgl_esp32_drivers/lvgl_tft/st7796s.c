@@ -27,7 +27,7 @@ typedef struct
 {
 	uint8_t cmd;
 	uint8_t data[16];
-	uint8_t databytes; //No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
+	uint8_t databytes; // No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
 } lcd_init_cmd_t;
 
 /**********************
@@ -81,7 +81,7 @@ void st7796s_init(void)
 		{0, {0}, 0xff},
 	};
 
-	//Initialize non-SPI GPIOs
+	// Initialize non-SPI GPIOs
 	gpio_pad_select_gpio(ST7796S_DC);
 	gpio_set_direction(ST7796S_DC, GPIO_MODE_OUTPUT);
 
@@ -89,7 +89,7 @@ void st7796s_init(void)
 	gpio_pad_select_gpio(ST7796S_RST);
 	gpio_set_direction(ST7796S_RST, GPIO_MODE_OUTPUT);
 
-	//Reset the display
+	// Reset the display
 	gpio_set_level(ST7796S_RST, 0);
 	vTaskDelay(100 / portTICK_RATE_MS);
 	gpio_set_level(ST7796S_RST, 1);
@@ -98,7 +98,7 @@ void st7796s_init(void)
 
 	ESP_LOGI(TAG, "Initialization.");
 
-	//Send all the commands
+	// Send all the commands
 	uint16_t cmd = 0;
 	while (init_cmds[cmd].databytes != 0xff)
 	{

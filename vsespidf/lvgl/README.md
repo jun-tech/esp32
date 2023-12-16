@@ -26,9 +26,11 @@
 
 6、Select predefined board pinouts、选esp-30pin开发板
 
-7、Select a display controller model，驱动选ili9481(我的屏是st7796，使用st7796s不成功)
+7、Select a display controller model，驱动选st7796
 
-​	   TFT SPI Duplex Mode，选HALF DUPLEX（半双工），去掉勾选Use custom SPI clock frequency.
+​	   Swap the 2 bytes of RGB565 color. Useful if the display has an 8-bit interface (e.g. SPI).勾上
+
+​		TFT SPI Duplex Mode，选HALF DUPLEX（半双工），去掉勾选Use custom SPI clock frequency.
 
 ​		或者勾选后选26MHz（FPS实测有点低，实际才7fps），按理vspi接口达到40Mhz-80MHz，但出现花屏或重启，调低频率
 
@@ -93,7 +95,17 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/periph
 |  QUADWP  |            2             |            22            |
 |  QUADHD  |            4             |            21            |
 
+4、 st7796s增加颜色翻转配置，需要像ili9481那样增加颜色翻转配置，ili9481(我的屏是st7796，使用st7796s不成功，但ili9481颜色偏淡问题)
 
+​		components/lvgl_esp32_drivers/lvgl_tft/Kconfig
+
+​		640行增加LV_TFT_DISPLAY_CONTROLLER_ST7796s判断
+
+​		config LV_INVERT_COLORS
+
+​        `bool "Invert colors in display" if LV_TFT_DISPLAY_CONTROLLER_ILI9341 || LV_TFT_DISPLAY_CONTROLLER_ST7735S || LV_TFT_DISPLAY_CONTROLLER_ILI9481 || LV_TFT_DISPLAY_CONTROLLER_ST7796S || LV_TFT_DISPLAY_CONTROLLER_ST7789 || LV_TFT_DISPLAY_CONTROLLER_SSD1306 || LV_TFT_DISPLAY_CONTROLLER_SH1107 || LV_TFT_DISPLAY_CONTROLLER_HX8357 || LV_TFT_DISPLAY_CONTROLLER_GC9A01 || LV_TFT_DISPLAY_CONTROLLER_ILI9163C`
+
+​		components/lvgl_esp32_drivers/lvgl_tft/st7796s.c中116行已经存在此判断，所以增加配置，进行配置即可
 
 # 提升FPS
 
