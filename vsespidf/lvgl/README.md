@@ -42,24 +42,26 @@
 
 10、接线配置
 
-|     TFT     |      |   ESP32    | ESP32-S2/S3 | ESP32-C2/C3 |           |
-| :---------: | :--: | :--------: | :---------: | :---------: | :-------: |
-|     VCC     |  --  |    3.3V    |    3.3V     |     3V3     |           |
-|     GND     |  --  |    GND     |     GND     |     GND     |           |
-|     CS      |  --  |   GPIO15   |   GPIO34    |    GPIO2    |           |
-|    REST     |  --  |   GPIO33   |   GPIO41    |    GPIO4    |   (*1)    |
-|     D/C     |  --  |   GPIO27   |   GPIO40    |    GPIO3    |   (*1)    |
-|    MOSI     |  --  | **GPIO13** |   GPIO35    |    GPIO0    | (*1) (*2) |
-|     SCK     |  --  | **GPIO14** |   GPIO36    |    GPIO1    | (*1) (*2) |
-| LED（背光） |  --  |    3.3V    |    3.3V     |    3.3V     | (*1) (*3) |
-|    MISO     |  --  |    N/C     |     N/C     |     N/C     |           |
-|    T_CLK    |  --  | **GPIO14** |   GPIO36    |    GPIO1    | (*1) (*2) |
-|    T_CS     |  --  |   GPIO21   |   GPIO38    |    GPIO7    | (*1) (*4) |
-|    T_DIN    |  --  | **GPIO13** |   GPIO35    |    GPIO0    | (*1) (*2) |
-|    T_OUT    |  --  |   GPIO12   |   GPIO37    |    GPIO6    | (*1) (*2) |
-|    T_IRQ    |  --  |   GPIO22   |   GPIO39    |    GPIO8    |           |
+|     TFT     |    ESP32    | ESP32-S2/S3 | ESP32-C2/C3 |           |
+| :---------: | :---------: | :---------: | :---------: | :-------: |
+|     VCC     |    3.3V     |    3.3V     |     3V3     |           |
+|     GND     |     GND     |     GND     |     GND     |           |
+|     CS      |   GPIO15    |   GPIO34    |    GPIO2    |           |
+|    REST     |   GPIO33    |   GPIO41    |    GPIO4    |   (*1)    |
+|     D/C     |   GPIO27    |   GPIO40    |    GPIO3    |   (*1)    |
+|    MOSI     | **GPIO13**  |   GPIO35    |    GPIO0    | (*1) (*2) |
+|     SCK     | **GPIO14**  |   GPIO36    |    GPIO1    | (*1) (*2) |
+| LED（背光） | 3.3V/GPIO32 |    3.3V     |    3.3V     | (*1) (*3) |
+|    MISO     |     N/C     |     N/C     |     N/C     |           |
+|    T_CLK    | **GPIO14**  |   GPIO36    |    GPIO1    | (*1) (*2) |
+|    T_CS     |   GPIO21    |   GPIO38    |    GPIO7    | (*1) (*4) |
+|    T_DIN    | **GPIO13**  |   GPIO35    |    GPIO0    | (*1) (*2) |
+|    T_OUT    |   GPIO12    |   GPIO37    |    GPIO6    | (*1) (*2) |
+|    T_IRQ    |   GPIO22    |   GPIO39    |    GPIO8    |           |
 
 Swap XY.选项去掉打勾	Invert X coordinate value.选项去掉打勾	Invert Y coordinate value.选项打勾
+
+
 
 # 编译修复错误
 
