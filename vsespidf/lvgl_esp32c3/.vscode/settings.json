@@ -1,0 +1,16 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "idf.port": "/dev/ttyACM0",
+  "idf.adapterTargetName": "esp32c3",
+  "idf.openOcdConfigs": [
+    "board/esp32c3-bridge.cfg"
+  ],
+  "idf.flashType": "UART",
+  "files.associations": {
+    "lvgl.h": "c",
+    "lv_demo_widgets.h": "c",
+    "lv_demos.h": "c",
+    "lvgl_helpers.h": "c",
+    "st7796s.h": "c"
+  }
+}

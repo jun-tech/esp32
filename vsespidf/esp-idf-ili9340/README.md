@@ -398,17 +398,17 @@ XPT2046 and HR2046 are very similar. But HR2046 does not work properly.
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |VCC|--|3.3V|3.3V|3V3||
 |GND|--|GND|GND|GND||
-|CS|--|GPIO14/GPIO5|GPIO34|GPIO2||
-|RES|--|GPIO33/GPIO22|GPIO41|GPIO4|(*1)|
-|D/C|--|GPIO27/GPIO21|GPIO40|GPIO3|(*1)|
-|MOSI|--|**GPIO23**|GPIO35|GPIO0|(*1) (*2)|
-|SCK|--|**GPIO18**|GPIO36|GPIO1|(*1) (*2)|
+|CS|--|GPIO14/GPIO5|GPIO34|GPIO7||
+|RES|--|GPIO33/GPIO22|GPIO41|GPIO11|(*1)|
+|D/C|--|GPIO27/GPIO21|GPIO40|GPIO6|(*1)|
+|MOSI|--|**GPIO23**|GPIO35|**GPIO3**|(*1) (*2)|
+|SCK|--|**GPIO18**|GPIO36|**GPIO2**|(*1) (*2)|
 |LED|--|3.3V|3.3V|3.3V|(*1) (*3)|
 |MISO|--|N/C|N/C|N/C||
-|T_CLK|--|**GPIO18**|GPIO36|GPIO1|(*1) (*2)|
-|T_CS|--|GPIO21|GPIO38|GPIO7|(*1) (*4)|
-|T_DIN|--|**GPIO23**|GPIO35|GPIO0|(*1) (*2)|
-|T_OUT|--|GPIO19|GPIO37|GPIO6|(*1) (*2)|
+|T_CLK|--|**GPIO18**|GPIO36|**GPIO2**|(*1) (*2)|
+|T_CS|--|GPIO21|GPIO38|GPIO4|(*1) (*4)|
+|T_DIN|--|**GPIO23**|GPIO35|**GPIO3**|(*1) (*2)|
+|T_OUT|--|GPIO19|GPIO37|GPIO5|(*1) (*2)|
 |T_IRQ|--|GPIO22|GPIO39|GPIO8|(*1) (*4)|
 
 (*1) You can change it to any gpio using menuconfig. But some gpio's are input only.   
