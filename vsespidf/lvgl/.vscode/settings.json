@@ -10,6 +10,8 @@
     "lvgl.h": "c",
     "lv_demo_widgets.h": "c",
     "lv_demos.h": "c",
-    "lvgl_helpers.h": "c"
+    "lvgl_helpers.h": "c",
+    "esp_vfs_fat.h": "c",
+    "sdmmc_types.h": "c"
   }
 }

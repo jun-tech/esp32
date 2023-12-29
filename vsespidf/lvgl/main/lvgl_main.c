@@ -11,9 +11,12 @@
 
 #include "lv_demos.h"
 
+#include "sd_card_example_main.h"
+
 /*-----------------函数声明-----------------------------------*/
 void lvgl_test(void);
 void lvgl_bg_color_test(void);
+void lvgl_read_sdcard_test(void);
 /*-----------------------------------------------------------*/
 
 /* LVGL 移植部分 */
@@ -26,6 +29,9 @@ SemaphoreHandle_t xGuiSemaphore;
 
 static void gui_demo()
 {
+    // 开启sdcard
+    sdcard_main();
+    lvgl_read_sdcard_test();
     // lvgl_bg_color_test();
     // lvgl_test();
     // lv_demo_widgets();
@@ -34,7 +40,7 @@ static void gui_demo()
     // lv_demo_printer();
     // 以下2案例性能测试
     // lv_demo_benchmark();
-    lv_demo_stress();
+    // lv_demo_stress();
 }
 
 /* UI 任务 */
@@ -141,6 +147,20 @@ void lvgl_test(void)
     lv_label_set_long_mode(label2, LV_LABEL_LONG_SCROLL_CIRCULAR); /*Circular scroll*/
     lv_obj_set_width(label2, 120);
     lv_label_set_text(label2, "It is a circularly scrolling text. ");
+    lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
+}
+
+void lvgl_read_sdcard_test(void)
+{
+
+    char linestr[64];
+    read_text(linestr, sizeof(linestr));
+
+    lv_obj_t *label2 = lv_label_create(lv_scr_act());
+    lv_label_set_long_mode(label2, LV_LABEL_LONG_SCROLL_CIRCULAR); /*Circular scroll*/
+    lv_obj_set_width(label2, 120);
+    // lv_label_set_text(label2, "It is a circularly scrolling text. ");
+    lv_label_set_text(label2, linestr);
     lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
 }
 

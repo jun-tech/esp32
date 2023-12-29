@@ -28,12 +28,12 @@ static void gui_demo()
 {
     // lvgl_bg_color_test();
     // lvgl_test();
-    lv_demo_widgets();
+    // lv_demo_widgets();
     // lv_demo_keypad_encoder();
     // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    // lv_demo_benchmark();
+    lv_demo_benchmark();
     // lv_demo_stress();
 }
 
@@ -45,9 +45,10 @@ static void gui_task(void *arg)
     lvgl_driver_init(); // lvgl显示接口初始化
 
     static lv_disp_draw_buf_t draw_buf;
-    lv_color_t *buf1 = heap_caps_malloc(LV_HOR_RES_MAX * 30 * sizeof(lv_color_t), MALLOC_CAP_DMA);
-    lv_color_t *buf2 = heap_caps_malloc(LV_HOR_RES_MAX * 30 * sizeof(lv_color_t), MALLOC_CAP_DMA);
-    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, LV_HOR_RES_MAX * 30); /*Initialize the display buffer*/
+    uint16_t buf_size = (LV_HOR_RES_MAX * LV_VER_RES_MAX) / 10;
+    lv_color_t *buf1 = heap_caps_malloc(buf_size * sizeof(lv_color_t), MALLOC_CAP_DMA);
+    lv_color_t *buf2 = heap_caps_malloc(buf_size * sizeof(lv_color_t), MALLOC_CAP_DMA);
+    lv_disp_draw_buf_init(&draw_buf, buf1, buf2, buf_size); /*Initialize the display buffer*/
 
     static lv_disp_drv_t disp_drv;         /*A variable to hold the drivers. Must be static or global.*/
     lv_disp_drv_init(&disp_drv);           /*Basic initialization*/

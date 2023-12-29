@@ -8,6 +8,7 @@
     "spi_common.h": "c",
     "sdmmc_types.h": "c",
     "dirent.h": "c",
-    "sdkconfig.h": "c"
+    "sdkconfig.h": "c",
+    "esp_vfs_fat.h": "c"
   }
 }
