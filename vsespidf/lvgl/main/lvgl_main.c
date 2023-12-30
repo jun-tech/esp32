@@ -211,6 +211,14 @@ void lvgl_read_sdcard_test(void)
         lv_label_set_text(label2, buf);
         lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
     }
+    vTaskDelay(pdMS_TO_TICKS(3000));
+
+    // 图片
+    lv_obj_t *image_bin = lv_img_create(lv_scr_act());
+    lv_obj_set_width(image_bin, 200);
+    lv_obj_set_height(image_bin, 200);
+    lv_img_set_src(image_bin, "S:happy.bin");
+    lv_obj_align(image_bin, LV_ALIGN_CENTER, 0, 40);
 }
 
 // 主函数
