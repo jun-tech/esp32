@@ -211,7 +211,8 @@ void lvgl_read_sdcard_test(void)
         lv_label_set_text(label2, buf);
         lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
     }
-    vTaskDelay(pdMS_TO_TICKS(3000));
+
+    vTaskDelay(pdMS_TO_TICKS(5000));
 
     // 图片
     lv_obj_t *image_bin = lv_img_create(lv_scr_act());
