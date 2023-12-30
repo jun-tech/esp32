@@ -8,14 +8,14 @@
 
 #include "lvgl.h"
 #include "lvgl_helpers.h"
+#include "lv_fs_if.h"
 
 #include "lv_demos.h"
-
-#include "sd_card_example_main.h"
 
 /*-----------------函数声明-----------------------------------*/
 void lvgl_test(void);
 void lvgl_bg_color_test(void);
+void lvgl_read_sdcard_dir_test(void);
 void lvgl_read_sdcard_test(void);
 /*-----------------------------------------------------------*/
 
@@ -30,7 +30,7 @@ SemaphoreHandle_t xGuiSemaphore;
 static void gui_demo()
 {
     // 开启sdcard
-    sdcard_main();
+    lvgl_read_sdcard_dir_test();
     lvgl_read_sdcard_test();
     // lvgl_bg_color_test();
     // lvgl_test();
@@ -48,6 +48,7 @@ static void gui_task(void *arg)
 {
     xGuiSemaphore = xSemaphoreCreateMutex();
     lv_init();          // lvgl内核初始化
+    lv_fs_if_init();    // sdcard 初始化
     lvgl_driver_init(); // lvgl显示接口初始化
 
     static lv_disp_draw_buf_t draw_buf;
@@ -150,18 +151,59 @@ void lvgl_test(void)
     lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
 }
 
+void lvgl_read_sdcard_dir_test(void)
+{
+    lv_fs_dir_t dir;
+    lv_fs_res_t res;
+    // res = lv_fs_dir_open(&dir, "S:folder"); // 遍历folder文件夹
+    res = lv_fs_dir_open(&dir, "S:"); // 遍历sdcard一级目录
+    if (res != LV_FS_RES_OK)
+    {
+        ESP_LOGE("sdcard_dir", "open fail");
+        return;
+    }
+
+    char fn[256];
+    while (1)
+    {
+        res = lv_fs_dir_read(&dir, fn);
+        if (res != LV_FS_RES_OK)
+        {
+            ESP_LOGE("sdcard_dir", "open fail");
+            break;
+        }
+
+        /*fn is empty, if not more files to read*/
+        if (strlen(fn) == 0)
+        {
+            break;
+        }
+
+        printf("%s\n", fn);
+    }
+
+    lv_fs_dir_close(&dir);
+}
+
 void lvgl_read_sdcard_test(void)
 {
-
-    char linestr[64];
-    read_text(linestr, sizeof(linestr));
-
-    lv_obj_t *label2 = lv_label_create(lv_scr_act());
-    lv_label_set_long_mode(label2, LV_LABEL_LONG_SCROLL_CIRCULAR); /*Circular scroll*/
-    lv_obj_set_width(label2, 120);
-    // lv_label_set_text(label2, "It is a circularly scrolling text. ");
-    lv_label_set_text(label2, linestr);
-    lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
+    lv_fs_file_t f;
+    lv_fs_res_t res;
+    // res = lv_fs_open(&f, "S:folder/foo.txt", LV_FS_MODE_RD); // 这里的S:folder文件夹下的foo.txt
+    res = lv_fs_open(&f, "S:foo.txt", LV_FS_MODE_RD); // 读取根目录foo.txt
+    if (res != LV_FS_RES_OK)
+    {
+        ESP_LOGE("sdcard_file", "open fail");
+    }
+    else
+    {
+        ESP_LOGI("sdcard_file", "open ok");
+        uint32_t read_num;
+        uint8_t buf[20];
+        res = lv_fs_read(&f, buf, 20, &read_num);
+        ESP_LOGI("main", "read:%s", buf);
+        lv_fs_close(&f);
+    }
 }
 
 // 主函数

@@ -124,3 +124,112 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/periph
 6、HAL Settings-Default display refresh period (ms).	 配置FPS，10000/x，得出帧数。配10，即100FPS，实际上只测到极限达到fps32
 
 7、使用hspi，spi频率40MHz，fps45，项目使用足够了；spi频率80MHz，fps97，很夸张，存在花屏现象，所以只作测试使用
+
+
+
+# 集成SDCard
+
+1、新建组件，F1选择>ESP-IDF Create new ESP-IDF Component，组件名lvgl_sdcard
+
+- [ ] CMakeLists.txt 加入 REQUIRES fatfs
+- [ ] 加入Kconfig，可配menuconfig，包括管脚配置、DMA通道、HSPI或VSPI，方便以后组件复用（SDCard SPI onfiguration）
+- [ ] 参照sd_card_example例子编写sdcard初始化代码
+
+2、lv_fs_if集成
+
+- [ ] https://github.com/lvgl/lv_fs_if，下载组件放到components
+
+- [ ] 参照此Readme，lv_fs_if.h加入
+
+  /*File system interface*/
+
+  \#define LV_USE_FS_IF 1
+
+  \#if LV_USE_FS_IF
+
+  \#define LV_FS_IF_FATFS 'S'
+
+  \#define LV_FS_IF_PC '\0'
+
+  \#define LV_FS_IF_POSIX '\0'
+
+  \#endif /*LV_USE_FS_IF*/
+
+- [ ] 新建CMakeLists.txt，引用写好的lvgl_sdcard组件
+
+- [ ] lv_fs_fatfs.c，
+
+  ```c
+  #include "lvgl_sdcard.h"
+  
+  /**
+  exists code
+  ...
+  ...
+  */
+  
+  /* Initialize your Storage device and File system. */
+  
+  static void fs_init(void)
+  
+  {
+  
+      /* Initialize the SD card and FatFS itself.
+  
+       \* Better to do it in your code to keep this library utouched for easy updating*/
+  
+  
+  
+      // mysdcard init
+  
+      sdcard_init();
+  
+  }
+  
+  
+  /**
+  exists code
+  ...
+  ...
+  */
+  
+  /**
+   * Initialize a 'fs_read_dir_t' variable for directory reading
+   * @param drv pointer to a driver where this function belongs
+   * @param dir_p pointer to a 'fs_read_dir_t' variable
+   * @param path path to a directory
+   * @return LV_FS_RES_OK or any error from lv_fs_res_t enum
+   */
+  static void *fs_dir_open(lv_fs_drv_t *drv, const char *path)
+  {
+      // DIR *d = lv_mem_alloc(sizeof(DIR));
+      // 修改FFDIR
+      FF_DIR *d = lv_mem_alloc(sizeof(FF_DIR));
+      if (d == NULL)
+          return NULL;
+  
+      FRESULT res = f_opendir(d, path);
+      if (res != FR_OK)
+      {
+          lv_mem_free(d);
+          d = NULL;
+      }
+      return d;
+  }
+  ```
+
+3、main集成测试
+
+- [ ] CMakeLists.txt中引入lv_fs_if组件
+
+- [ ] lvgl 初始化后，初始化sdcard
+
+  ```c
+   lv_init();          // lvgl内核初始化
+  
+   lv_fs_if_init();    // sdcard 初始化
+  
+   lvgl_driver_init(); // lvgl显示接口初始化
+  ```
+
+  

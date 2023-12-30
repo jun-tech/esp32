@@ -12,6 +12,10 @@
     "lv_demos.h": "c",
     "lvgl_helpers.h": "c",
     "esp_vfs_fat.h": "c",
-    "sdmmc_types.h": "c"
+    "sdmmc_types.h": "c",
+    "ff.h": "c",
+    "sdkconfig.h": "c",
+    "lvgl_sdcard.h": "c",
+    "lv_fs_if.h": "c"
   }
 }
