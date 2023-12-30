@@ -199,10 +199,17 @@ void lvgl_read_sdcard_test(void)
     {
         ESP_LOGI("sdcard_file", "open ok");
         uint32_t read_num;
-        uint8_t buf[20];
-        res = lv_fs_read(&f, buf, 20, &read_num);
+        char buf[20];
+        res = lv_fs_read(&f, buf, sizeof(buf), &read_num);
         ESP_LOGI("main", "read:%s", buf);
         lv_fs_close(&f);
+
+        // 屏幕显示
+        lv_obj_t *label2 = lv_label_create(lv_scr_act());
+        lv_label_set_long_mode(label2, LV_LABEL_LONG_SCROLL_CIRCULAR); /*Circular scroll*/
+        lv_obj_set_width(label2, 120);
+        lv_label_set_text(label2, buf);
+        lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
     }
 }
 
