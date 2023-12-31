@@ -64,7 +64,8 @@ esp_err_t sdcard_init(void)
 
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
     // 此处更改成5000，否则报ESP_ERR_INVALID_CRC错误
-    host.max_freq_khz = 5000;
+    // host.max_freq_khz = 5000;
+    host.max_freq_khz = 20000; // 20MHz
     // SPI2 已经被lvgl占用换3
     host.slot = SD_SPI_HOST;
 

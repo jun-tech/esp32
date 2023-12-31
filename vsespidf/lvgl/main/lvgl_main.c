@@ -17,6 +17,14 @@ void lvgl_test(void);
 void lvgl_bg_color_test(void);
 void lvgl_read_sdcard_dir_test(void);
 void lvgl_read_sdcard_test(void);
+static void lv_tm_cb();
+/*-----------------------------------------------------------*/
+
+/*-----------------变量声明-----------------------------------*/
+static lv_obj_t *page1 = NULL;
+static lv_obj_t *page2 = NULL;
+static lv_timer_t *lv_tm;
+static int page_index = 0;
 /*-----------------------------------------------------------*/
 
 /* LVGL 移植部分 */
@@ -30,7 +38,7 @@ SemaphoreHandle_t xGuiSemaphore;
 static void gui_demo()
 {
     // 开启sdcard
-    lvgl_read_sdcard_dir_test();
+    // lvgl_read_sdcard_dir_test();
     lvgl_read_sdcard_test();
     // lvgl_bg_color_test();
     // lvgl_test();
@@ -41,6 +49,31 @@ static void gui_demo()
     // 以下2案例性能测试
     // lv_demo_benchmark();
     // lv_demo_stress();
+}
+
+// 定时器
+static void lv_tm_cb(lv_timer_t *tmr)
+{
+    // ESP_LOGI("lv_tm_cb", "page %d", page_index);
+    // 过渡画面
+    if (page_index == 0)
+    {
+        lv_scr_load(page1);
+    }
+    else
+    {
+        // lv_scr_load_anim(page2, LV_SCR_LOAD_ANIM_OVER_RIGHT, 300, 0, false);
+        // lv_scr_load_anim(page2, LV_SCR_LOAD_ANIM_OVER_LEFT, 1000, 0, false);
+        lv_scr_load_anim(page2, LV_SCR_LOAD_ANIM_FADE_IN, 1000, 0, false);
+        // lv_scr_load(page2);
+    }
+    page_index++;
+
+    // 超过屏幕数，切换回第一屏幕
+    if (page_index > 1)
+    {
+        page_index = 0;
+    }
 }
 
 /* UI 任务 */
@@ -84,6 +117,8 @@ static void gui_task(void *arg)
     esp_register_freertos_tick_hook((void *)lv_tick_task);
 
     gui_demo();
+    ESP_LOGI("main", "begin timer");
+    lv_tm = lv_timer_create(lv_tm_cb, 5000, 0);
 
     while (1)
     {
@@ -187,9 +222,7 @@ void lvgl_read_sdcard_dir_test(void)
 
 void lvgl_read_sdcard_test(void)
 {
-
     // 创建屏幕1
-    static lv_obj_t *page1 = NULL;
     page1 = lv_obj_create(NULL);
     if (page1 != NULL)
     {
@@ -223,7 +256,6 @@ void lvgl_read_sdcard_test(void)
     }
 
     // 创建屏幕2
-    static lv_obj_t *page2 = NULL;
     page2 = lv_obj_create(NULL);
     if (page2 != NULL)
     {
@@ -236,10 +268,6 @@ void lvgl_read_sdcard_test(void)
         lv_img_set_src(image_bin, "S:happy.bin");
         lv_obj_align(image_bin, LV_ALIGN_CENTER, 0, 40);
     }
-
-    // 过渡画面
-    lv_scr_load(page1);
-    lv_scr_load_anim(page2, LV_SCR_LOAD_ANIM_FADE_ON, 300, 3000, true);
 }
 
 // 主函数
