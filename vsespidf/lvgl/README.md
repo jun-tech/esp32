@@ -240,6 +240,6 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/periph
 下载一张图片，然后https://lvgl.io/tools/imageconverter转成bin，复制到sdcard
 
 - [ ] Color Format选CF_TRUE_COLOR
-- [ ] Output Format 选Binary RGB565
+- [ ] Output Format 选Binary RGB565 SWAP
 - [ ] Options 勾选Dither images
 

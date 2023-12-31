@@ -187,39 +187,59 @@ void lvgl_read_sdcard_dir_test(void)
 
 void lvgl_read_sdcard_test(void)
 {
-    lv_fs_file_t f;
-    lv_fs_res_t res;
-    // res = lv_fs_open(&f, "S:folder/foo.txt", LV_FS_MODE_RD); // 这里的S:folder文件夹下的foo.txt
-    res = lv_fs_open(&f, "S:foo.txt", LV_FS_MODE_RD); // 读取根目录foo.txt
-    if (res != LV_FS_RES_OK)
+
+    // 创建屏幕1
+    static lv_obj_t *page1 = NULL;
+    page1 = lv_obj_create(NULL);
+    if (page1 != NULL)
     {
-        ESP_LOGE("sdcard_file", "open fail");
+        lv_obj_set_size(page1, LV_HOR_RES, LV_VER_RES);
+
+        lv_fs_file_t f;
+        lv_fs_res_t res;
+        // res = lv_fs_open(&f, "S:folder/foo.txt", LV_FS_MODE_RD); // 这里的S:folder文件夹下的foo.txt
+        res = lv_fs_open(&f, "S:foo.txt", LV_FS_MODE_RD); // 读取根目录foo.txt
+        if (res != LV_FS_RES_OK)
+        {
+            ESP_LOGE("sdcard_file", "open fail");
+        }
+        else
+        {
+            ESP_LOGI("sdcard_file", "open ok");
+            uint32_t read_num;
+            char buf[20];
+            res = lv_fs_read(&f, buf, sizeof(buf), &read_num);
+            ESP_LOGI("main", "read:%s", buf);
+            lv_fs_close(&f);
+
+            // 屏幕显示
+            // lv_obj_t *label2 = lv_label_create(lv_scr_act());
+            lv_obj_t *label2 = lv_label_create(page1);
+            lv_label_set_long_mode(label2, LV_LABEL_LONG_SCROLL_CIRCULAR); /*Circular scroll*/
+            lv_obj_set_width(label2, 120);
+            lv_label_set_text(label2, buf);
+            lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
+        }
     }
-    else
+
+    // 创建屏幕2
+    static lv_obj_t *page2 = NULL;
+    page2 = lv_obj_create(NULL);
+    if (page2 != NULL)
     {
-        ESP_LOGI("sdcard_file", "open ok");
-        uint32_t read_num;
-        char buf[20];
-        res = lv_fs_read(&f, buf, sizeof(buf), &read_num);
-        ESP_LOGI("main", "read:%s", buf);
-        lv_fs_close(&f);
-
-        // 屏幕显示
-        lv_obj_t *label2 = lv_label_create(lv_scr_act());
-        lv_label_set_long_mode(label2, LV_LABEL_LONG_SCROLL_CIRCULAR); /*Circular scroll*/
-        lv_obj_set_width(label2, 120);
-        lv_label_set_text(label2, buf);
-        lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
+        lv_obj_set_size(page2, LV_HOR_RES, LV_VER_RES);
+        // 图片
+        // lv_obj_t *image_bin = lv_img_create(lv_scr_act());
+        lv_obj_t *image_bin = lv_img_create(page2);
+        lv_obj_set_width(image_bin, 200);
+        lv_obj_set_height(image_bin, 200);
+        lv_img_set_src(image_bin, "S:happy.bin");
+        lv_obj_align(image_bin, LV_ALIGN_CENTER, 0, 40);
     }
 
-    vTaskDelay(pdMS_TO_TICKS(5000));
-
-    // 图片
-    lv_obj_t *image_bin = lv_img_create(lv_scr_act());
-    lv_obj_set_width(image_bin, 200);
-    lv_obj_set_height(image_bin, 200);
-    lv_img_set_src(image_bin, "S:happy.bin");
-    lv_obj_align(image_bin, LV_ALIGN_CENTER, 0, 40);
+    // 过渡画面
+    lv_scr_load(page1);
+    lv_scr_load_anim(page2, LV_SCR_LOAD_ANIM_FADE_ON, 300, 3000, true);
 }
 
 // 主函数
