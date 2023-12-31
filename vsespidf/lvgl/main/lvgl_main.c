@@ -268,6 +268,8 @@ void lvgl_read_sdcard_test(void)
         lv_img_set_src(image_bin, "S:happy.bin");
         lv_obj_align(image_bin, LV_ALIGN_CENTER, 0, 40);
     }
+
+    lv_scr_load(page1);
 }
 
 // 主函数
