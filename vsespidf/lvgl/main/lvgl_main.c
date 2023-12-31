@@ -17,7 +17,7 @@ void lvgl_test(void);
 void lvgl_bg_color_test(void);
 void lvgl_read_sdcard_dir_test(void);
 void lvgl_read_sdcard_test(void);
-static void lv_tm_cb();
+static void lv_tm_cb(lv_timer_t *tmr);
 /*-----------------------------------------------------------*/
 
 /*-----------------变量声明-----------------------------------*/
