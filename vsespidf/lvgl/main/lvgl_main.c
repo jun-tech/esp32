@@ -24,7 +24,7 @@ static void lv_tm_cb(lv_timer_t *tmr);
 static lv_obj_t *page1 = NULL;
 static lv_obj_t *page2 = NULL;
 static lv_timer_t *lv_tm;
-static int page_index = 0;
+static int page_index = 1;
 /*-----------------------------------------------------------*/
 
 /* LVGL 移植部分 */
@@ -118,7 +118,7 @@ static void gui_task(void *arg)
 
     gui_demo();
     ESP_LOGI("main", "begin timer");
-    lv_tm = lv_timer_create(lv_tm_cb, 5000, 0);
+    lv_tm = lv_timer_create(lv_tm_cb, 3000, 0);
 
     while (1)
     {

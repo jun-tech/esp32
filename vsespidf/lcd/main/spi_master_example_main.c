@@ -14,6 +14,7 @@
 #include "esp_system.h"
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
+#include "esp_log.h"
 
 #include "pretty_effect.h"
 
@@ -29,16 +30,16 @@
 */
 
 #ifdef CONFIG_IDF_TARGET_ESP32
-#define LCD_HOST HSPI_HOST
+#define LCD_HOST VSPI_HOST
 
-#define PIN_NUM_MISO 25
-#define PIN_NUM_MOSI 23
-#define PIN_NUM_CLK 18
-#define PIN_NUM_CS 5
+#define PIN_NUM_MISO 12
+#define PIN_NUM_MOSI 13
+#define PIN_NUM_CLK 14
+#define PIN_NUM_CS 15
 
-#define PIN_NUM_DC 21
-#define PIN_NUM_RST 22
-#define PIN_NUM_BCKL 15
+#define PIN_NUM_DC 27
+#define PIN_NUM_RST 33
+#define PIN_NUM_BCKL 32
 #elif defined CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
 #define LCD_HOST SPI2_HOST
 
@@ -84,6 +85,25 @@ typedef enum
     LCD_TYPE_MAX,
 } type_lcd_t;
 
+static const char *TAG = "MAIN";
+
+// 屏幕宽高
+#define SCREEN_W 320
+#define SCREEN_H 480
+
+// 颜色
+#define rgb565(r, g, b) (((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3))
+#define RED rgb565(255, 0, 0)       // 0xf800
+#define GREEN rgb565(0, 255, 0)     // 0x07e0
+#define BLUE rgb565(0, 0, 255)      // 0x001f
+#define BLACK rgb565(0, 0, 0)       // 0x0000
+#define WHITE rgb565(255, 255, 255) // 0xffff
+#define GRAY rgb565(128, 128, 128)  // 0x8410
+#define YELLOW rgb565(255, 255, 0)  // 0xFFE0
+#define CYAN rgb565(0, 156, 209)    // 0x04FA
+#define PURPLE rgb565(128, 0, 128)  // 0x8010
+
+// 初始化时指令ST7796
 DRAM_ATTR static const lcd_init_cmd_t ili_init_cmds[] = {
     {0xC0, {0x10, 0x10}, 2},
     {0xC1, {0x41}, 1},
@@ -347,6 +367,67 @@ static void display_pretty_colors(spi_device_handle_t spi)
     }
 }
 
+// 着色
+void spi_master_write_color(spi_device_handle_t spi, uint16_t color, uint16_t size)
+{
+    static uint8_t Byte[1024];
+    int index = 0;
+    for (int i = 0; i < size; i++)
+    {
+        Byte[index++] = (color >> 8) & 0xFF;
+        Byte[index++] = color & 0xFF;
+    }
+    gpio_set_level(PIN_NUM_DC, 1); // 数据模式
+    lcd_data(spi, Byte, size);
+}
+
+// Draw rectangle of filling
+// x1:Start X coordinate
+// y1:Start Y coordinate
+// x2:End X coordinate
+// y2:End Y coordinate
+// color:color
+void lcdDrawFillRect(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
+{
+    if (x1 >= SCREEN_W)
+        return;
+    if (x2 >= SCREEN_W)
+        x2 = SCREEN_W - 1;
+    if (y1 >= SCREEN_H)
+        return;
+    if (y2 >= SCREEN_H)
+        y2 = SCREEN_H - 1;
+
+    uint16_t _x1 = x1;
+    uint16_t _x2 = x2;
+    uint16_t _y1 = y1;
+    uint16_t _y2 = y2;
+
+    // 打印
+    ESP_LOGI(TAG, "x1: %d, y1: %d, x2: %d, y2: %d", x1, y1, x2, y2);
+
+    lcd_cmd(spi, 0x2A); // set column(x) address
+    const uint8_t datax = {_x1, _x2};
+    lcd_data(spi, datax, 2);
+
+    lcd_cmd(spi, 0x2B); // set Page(y) address
+    const uint8_t datay = {_y1, _y2};
+    lcd_data(spi, datay, 2);
+
+    lcd_cmd(spi, 0x2C); // Memory Write
+
+    for (int i = _x1; i <= _x2; i++)
+    {
+        uint16_t size = _y2 - _y1 + 1;
+        spi_master_write_color(spi, color, size);
+    }
+}
+
+void lcdFillScreen(spi_device_handle_t spi, uint16_t color)
+{
+    lcdDrawFillRect(spi, 0, 0, SCREEN_W - 1, SCREEN_H - 1, color);
+}
+
 void app_main(void)
 {
     esp_err_t ret;
@@ -378,9 +459,20 @@ void app_main(void)
     // Initialize the LCD
     lcd_init(spi);
     // Initialize the effect displayed
-    ret = pretty_effect_init();
-    ESP_ERROR_CHECK(ret);
+    // ret = pretty_effect_init();
+    // ESP_ERROR_CHECK(ret);
 
-    // Go do nice stuff.
-    display_pretty_colors(spi);
+    // // Go do nice stuff.
+    // display_pretty_colors(spi);
+
+    while (1)
+    {
+        // 颜色测试
+        lcdFillScreen(spi, RED);
+        vTaskDelay(50);
+        lcdFillScreen(spi, GREEN);
+        vTaskDelay(50);
+        lcdFillScreen(spi, BLUE);
+        vTaskDelay(50);
+    }
 }
