@@ -378,7 +378,7 @@ void spi_master_write_color(spi_device_handle_t spi, uint16_t color, uint16_t si
         Byte[index++] = color & 0xFF;
     }
     gpio_set_level(PIN_NUM_DC, 1); // 数据模式
-    lcd_data(spi, Byte, size);
+    lcd_data(spi, Byte, size * 2);
 }
 
 // Draw rectangle of filling
@@ -443,11 +443,14 @@ void app_main(void)
 #ifdef CONFIG_LCD_OVERCLOCK
         .clock_speed_hz = 26 * 1000 * 1000, // Clock out at 26 MHz
 #else
-        .clock_speed_hz = 10 * 1000 * 1000, // Clock out at 10 MHz
+        // .clock_speed_hz = 10 * 1000 * 1000, // Clock out at 10 MHz
+        .clock_speed_hz = SPI_MASTER_FREQ_40M,
 #endif
-        .mode = 0,                               // SPI mode 0
-        .spics_io_num = PIN_NUM_CS,              // CS pin
-        .queue_size = 7,                         // We want to be able to queue 7 transactions at a time
+        .mode = 0,                  // SPI mode 0
+        .spics_io_num = PIN_NUM_CS, // CS pin
+        .queue_size = 7,
+        // We want to be able to queue 7 transactions at a time
+        .flags = SPI_DEVICE_NO_DUMMY,            // 40MHz刷屏需要加上，而且要专用VSPI或HSPI引脚
         .pre_cb = lcd_spi_pre_transfer_callback, // Specify pre-transfer callback to handle D/C line
     };
     // Initialize the SPI bus
