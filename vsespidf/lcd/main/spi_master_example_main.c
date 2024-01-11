@@ -404,7 +404,7 @@ void lcdDrawFillRect(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t
     uint16_t _y2 = y2;
 
     // 打印
-    ESP_LOGI(TAG, "x1: %d, y1: %d, x2: %d, y2: %d", x1, y1, x2, y2);
+    // ESP_LOGI(TAG, "x1: %d, y1: %d, x2: %d, y2: %d", x1, y1, x2, y2);
 
     lcd_cmd(spi, 0x2A); // set column(x) address
     const uint8_t datax = {_x1, _x2};
@@ -472,10 +472,10 @@ void app_main(void)
     {
         // 颜色测试
         lcdFillScreen(spi, RED);
-        vTaskDelay(50);
+        vTaskDelay(1);
         lcdFillScreen(spi, GREEN);
-        vTaskDelay(50);
+        vTaskDelay(1);
         lcdFillScreen(spi, BLUE);
-        vTaskDelay(50);
+        vTaskDelay(1);
     }
 }
