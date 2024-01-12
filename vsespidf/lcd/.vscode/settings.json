@@ -7,6 +7,15 @@
   "idf.port": "/dev/ttyUSB0",
   "idf.flashType": "UART",
   "files.associations": {
-    "*.inc": "c"
+    "*.inc": "c",
+    "lvgl.h": "c",
+    "lvgl_spi.h": "c",
+    "array": "c",
+    "string_view": "c",
+    "initializer_list": "c",
+    "utility": "c",
+    "spi_mgr.h": "c",
+    "bitset": "c",
+    "regex": "c"
   }
 }

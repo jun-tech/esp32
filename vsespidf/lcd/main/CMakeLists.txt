@@ -1,8 +1,9 @@
-set(srcs "pretty_effect.c"
-    "spi_master_example_main.c"
-    "decode_image.c"
-    )
+set(srcs "main.c"
+)
 
 idf_component_register(SRCS ${srcs}
-                    INCLUDE_DIRS "."
-                    EMBED_FILES image.jpg)
+    INCLUDE_DIRS "."
+
+    # REQUIRES spi_mgr lvgl lvgl_drivers
+    REQUIRES spi_mgr tft_drivers
+)
