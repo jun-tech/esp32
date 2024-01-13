@@ -68,8 +68,43 @@ void tftInit(TFTDev_t *dev)
     printf("LCD ST7796 initialization.\n");
 }
 
-void tftSetDirect(TFTDev_t *dev)
+void tftSetDirection(TFTDev_t *dev, DIRECTION direct)
 {
+    uint8_t xycmd[2];
+    if (direct == DIRECTION0 || direct == DIRECTION180) // 竖屏
+    {
+        dev->width = TFT_WIDTH;
+        dev->height = TFT_HEIGHT;
+        if (direct == DIRECTION0) // 0-0度旋转
+        {
+            xycmd[1] = 0x40;
+        }
+        else // 1-180度旋转
+        {
+            xycmd[1] = 0x80;
+        }
+    }
+    else if (direct == DIRECTION90 || direct == DIRECTION270) // 横屏
+    {
+        dev->width = TFT_HEIGHT;
+        dev->height = TFT_WIDTH;
+        if (direct == DIRECTION270) // 2-270度旋转
+        {
+            xycmd[1] = 0x80 | 0x40 | 0x20;
+        }
+        else // 3-90度旋转
+        {
+            xycmd[1] = 0x20;
+        }
+    }
+    int ST7796_MAD_BGR = 0x08;
+    xycmd[0] = 0x36;
+    xycmd[1] = xycmd[1] | ST7796_MAD_BGR;
+    spi_write_cmd(&dev->devspi, xycmd[0]);
+    spi_write_cmd(&dev->devspi, xycmd[1]);
+
+    // 设置绘制区域
+    tftSetWindow(dev, 0, 0, dev->width, dev->height);
 }
 
 void tftSetWindow(TFTDev_t *dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)

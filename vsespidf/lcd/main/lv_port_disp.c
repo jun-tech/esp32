@@ -17,18 +17,16 @@
 /*********************
  *      DEFINES
  *********************/
-#define MY_DISP_HOR_RES 320
-#define MY_DISP_VER_RES 480
 
-#ifndef MY_DISP_HOR_RES
-#warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen width, default value 320 is used for now.
-#define MY_DISP_HOR_RES 320
-#endif
+// #ifndef MY_DISP_HOR_RES
+// #warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen width, default value 320 is used for now.
+// #define MY_DISP_HOR_RES 320
+// #endif
 
-#ifndef MY_DISP_VER_RES
-#warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen height, default value 240 is used for now.
-#define MY_DISP_VER_RES 240
-#endif
+// #ifndef MY_DISP_VER_RES
+// #warning Please define or replace the macro MY_DISP_HOR_RES with the actual screen height, default value 240 is used for now.
+// #define MY_DISP_VER_RES 240
+// #endif
 
 /**********************
  *      TYPEDEFS
@@ -51,7 +49,7 @@ extern TFTDev_t tftDev;
 /**********************
  *      MACROS
  **********************/
-
+#define LVGL_DISP_BUF_SIZE TFT_WIDTH *TFT_HEIGHT / 10
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -89,15 +87,15 @@ void lv_port_disp_init(void)
      */
 
     /* Example for 1) */
-    static lv_disp_draw_buf_t draw_buf_dsc_1;
-    static lv_color_t buf_1[MY_DISP_HOR_RES * 10];                             /*A buffer for 10 rows*/
-    lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, MY_DISP_HOR_RES * 10); /*Initialize the display buffer*/
+    // static lv_disp_draw_buf_t draw_buf_dsc_1;
+    // static lv_color_t buf_1[MY_DISP_HOR_RES * 10];                             /*A buffer for 10 rows*/
+    // lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, MY_DISP_HOR_RES * 10); /*Initialize the display buffer*/
 
     /* Example for 2) */
-    // static lv_disp_draw_buf_t draw_buf_dsc_2;
-    // static lv_color_t buf_2_1[MY_DISP_HOR_RES * 10];                                /*A buffer for 10 rows*/
-    // static lv_color_t buf_2_2[MY_DISP_HOR_RES * 10];                                /*An other buffer for 10 rows*/
-    // lv_disp_draw_buf_init(&draw_buf_dsc_2, buf_2_1, buf_2_2, MY_DISP_HOR_RES * 10); /*Initialize the display buffer*/
+    static lv_disp_draw_buf_t draw_buf_dsc_2;
+    static lv_color_t buf_2_1[LVGL_DISP_BUF_SIZE];                                /*A buffer for 10 rows*/
+    static lv_color_t buf_2_2[LVGL_DISP_BUF_SIZE];                                /*An other buffer for 10 rows*/
+    lv_disp_draw_buf_init(&draw_buf_dsc_2, buf_2_1, buf_2_2, LVGL_DISP_BUF_SIZE); /*Initialize the display buffer*/
 
     // /* Example for 3) also set disp_drv.full_refresh = 1 below*/
     // static lv_disp_draw_buf_t draw_buf_dsc_3;
@@ -116,14 +114,14 @@ void lv_port_disp_init(void)
     /*Set up the functions to access to your display*/
 
     /*Set the resolution of the display*/
-    disp_drv.hor_res = MY_DISP_HOR_RES;
-    disp_drv.ver_res = MY_DISP_VER_RES;
+    disp_drv.hor_res = tftDev.width;
+    disp_drv.ver_res = tftDev.height;
 
     /*Used to copy the buffer's content to the display*/
     disp_drv.flush_cb = disp_flush;
 
     /*Set a display buffer*/
-    disp_drv.draw_buf = &draw_buf_dsc_1;
+    disp_drv.draw_buf = &draw_buf_dsc_2;
 
     /*Required for Example 3)*/
     // disp_drv.full_refresh = 1;
@@ -173,10 +171,10 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
         // 绘制区域
         uint16_t w = lv_area_get_width(area);
         uint16_t h = lv_area_get_height(area);
-        tftSetWindow(&tftDev, area->x1, area->y1, area->x2 + w, area->y2 + h);
+        tftSetWindow(&tftDev, area->x1, area->y1, area->x2, area->y2);
         // 计算要传输的数据大小
         uint32_t size = w * h * 2;
-        spi_write_datas(&tftDev.devspi, color_p, size);
+        spi_write_datas(&tftDev.devspi, (uint8_t *)color_p, size);
     }
 
     /*IMPORTANT!!!

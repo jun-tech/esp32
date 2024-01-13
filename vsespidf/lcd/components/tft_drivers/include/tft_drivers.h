@@ -14,6 +14,10 @@
 #define CYAN rgb565(0, 156, 209)    // 0x04FA
 #define PURPLE rgb565(128, 0, 128)  // 0x8010
 
+// 屏幕宽高
+#define TFT_WIDTH 320
+#define TFT_HEIGHT 480
+
 typedef enum
 {
     DIRECTION0,
@@ -30,6 +34,7 @@ typedef struct tft_dev
     int height;
     int offsetx;
     int offsety;
+    DIRECTION direction;
 
     // 管脚
     int pincs;
@@ -40,7 +45,7 @@ typedef struct tft_dev
 
 void tftInit(TFTDev_t *dev);
 void tftSetWindow(TFTDev_t *dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
-void tftSetDirect(TFTDev_t *dev);
+void tftSetDirection(TFTDev_t *dev, DIRECTION direct);
 void tftClear(TFTDev_t *dev, uint16_t color);
 
 #endif

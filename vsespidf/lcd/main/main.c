@@ -36,14 +36,19 @@ TFTDev_t tftDev = {
         .pin_miso = -1,
         .pin_sclk = 14,
         .pin_cs = 15},
-    .width = 320,
-    .height = 480,
+    .width = TFT_WIDTH,
+    .height = TFT_HEIGHT,
     .model = 0x7796,
     .offsetx = 0,
     .offsety = 0,
+    .direction = DIRECTION0,
     .pincs = 15,
     .pinrst = 33,
     .pinbckl = 32};
+
+/*-----------------函数声明-----------------------------------*/
+void lvgl_bg_color_test(void);
+/*-----------------函数声明-----------------------------------*/
 
 /* LVGL 移植部分 */
 static void lv_tick_task(void *arg)
@@ -53,6 +58,32 @@ static void lv_tick_task(void *arg)
 }
 SemaphoreHandle_t xGuiSemaphore;
 
+void lvgl_bg_color_test(void)
+{
+    // base bg color
+    static lv_style_t style;
+    lv_style_init(&style);
+    // lv_style_set_bg_color(&style, lv_palette_lighten(LV_PALETTE_RED, 1));// 颜色纯度
+    lv_style_set_bg_color(&style, lv_palette_main(LV_PALETTE_RED)); // 单色
+
+    lv_obj_t *obj = lv_obj_create(lv_scr_act()); // 创建对象
+    lv_obj_add_style(obj, &style, 0);            // 设置对象的样式
+    lv_obj_set_size(obj, tftDev.width / 3, tftDev.height);
+    lv_obj_set_pos(obj, 0, 0);
+
+    lv_obj_t *obj1 = lv_obj_create(lv_scr_act());                          // 创建对象
+    lv_obj_add_style(obj1, &style, 0);                                     // 设置对象的样式
+    lv_obj_set_style_bg_color(obj1, lv_palette_main(LV_PALETTE_GREEN), 0); // 单色
+    lv_obj_set_size(obj1, tftDev.width / 3, tftDev.height);
+    lv_obj_set_pos(obj1, tftDev.width / 3, 0);
+
+    lv_obj_t *obj2 = lv_obj_create(lv_scr_act());                         // 创建对象
+    lv_obj_add_style(obj2, &style, 0);                                    // 设置对象的样式
+    lv_obj_set_style_bg_color(obj2, lv_palette_main(LV_PALETTE_BLUE), 0); // 单色
+    lv_obj_set_size(obj2, tftDev.width / 3, tftDev.height);
+    lv_obj_set_pos(obj2, (tftDev.width / 3) * 2, 0);
+}
+
 static void gui_demo()
 {
     // 开启sdcard
@@ -60,13 +91,13 @@ static void gui_demo()
     // lvgl_read_sdcard_test();
     // lvgl_bg_color_test();
     // lvgl_test();
-    lv_demo_widgets();
+    // lv_demo_widgets();
     // lv_demo_keypad_encoder();
     // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
     // lv_demo_benchmark();
-    // lv_demo_stress();
+    lv_demo_stress();
 }
 
 /* UI 任务 */
@@ -105,10 +136,13 @@ void app_main()
     spi_mgr_bus_init(&tftDev.devspi);
 
     // 将屏幕添加到总线80MHz
-    spi_mgr_bus_add_device(&tftDev.devspi, 20 * 1000 * 1000);
+    spi_mgr_bus_add_device(&tftDev.devspi, 40 * 1000 * 1000);
 
     // 屏幕初始化
     tftInit(&tftDev);
+
+    // 屏幕方向
+    // tftSetDirection(&tftDev, DIRECTION90);
 
     // 清屏
     tftClear(&tftDev, RED);
@@ -122,5 +156,5 @@ void app_main()
 
     ESP_LOGI(TAG, "lvgl start...");
 
-    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 4, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 20, NULL, 1, NULL, 0);
 }

@@ -14,12 +14,9 @@ void spi_mgr_bus_init(DevSPI_t *devspi)
 {
     esp_err_t ret;
 
+    ESP_LOGI(TAG, "MISO=%d", devspi->pin_miso);
     ESP_LOGI(TAG, "MOSI=%d", devspi->pin_mosi);
     ESP_LOGI(TAG, "SCLK=%d", devspi->pin_sclk);
-    ESP_LOGI(TAG, "CS=%d", devspi->pin_cs);
-    gpio_reset_pin(devspi->pin_cs);
-    gpio_set_direction(devspi->pin_cs, GPIO_MODE_OUTPUT);
-    gpio_set_level(devspi->pin_cs, 1);
 
     spi_bus_config_t buscfg = {
         .miso_io_num = devspi->pin_miso,
@@ -43,6 +40,11 @@ void spi_pre_transfer_callback(spi_transaction_t *t)
 bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
 {
     esp_err_t ret;
+
+    ESP_LOGI(TAG, "CS=%d", devspi->pin_cs);
+    gpio_reset_pin(devspi->pin_cs);
+    gpio_set_direction(devspi->pin_cs, GPIO_MODE_OUTPUT);
+    gpio_set_level(devspi->pin_cs, 1);
 
     spi_device_interface_config_t devcfg = {
         .clock_speed_hz = clock_speed_hz,
