@@ -27,7 +27,7 @@ void spi_mgr_bus_init(DevSPI_t *devspi);
 /**
  * 往总线添加设备
  */
-bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz, int16_t cs);
+bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz);
 
 /**
  * 发送数据

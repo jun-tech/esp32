@@ -27,7 +27,7 @@ void spi_mgr_bus_init(DevSPI_t *devspi)
         .sclk_io_num = devspi->pin_sclk,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
-    };
+        .max_transfer_sz = 81920};
     ret = spi_bus_initialize(devspi->spi_host, &buscfg, SPI_DMA_CH_AUTO);
     ESP_LOGI(TAG, "spi_bus_initialize ret=%d SPI_HOST=%d", ret, devspi->spi_host);
     assert(ret == ESP_OK);
@@ -40,16 +40,16 @@ void spi_pre_transfer_callback(spi_transaction_t *t)
     // ESP_LOGI(TAG, "dc: %d", dc);
 }
 // 往总线添加设备
-bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz, int16_t cs)
+bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
 {
     esp_err_t ret;
 
     spi_device_interface_config_t devcfg = {
         .clock_speed_hz = clock_speed_hz,
-        .spics_io_num = cs, // 中断发送，这里不用赋值，否则中断发送不出去
+        .spics_io_num = devspi->pin_cs, // 中断发送，这里不用赋值，否则中断发送不出去
         .queue_size = 7,
         .pre_cb = spi_pre_transfer_callback, // Specify pre-transfer callback to handle D/C line
-        .flags = SPI_DEVICE_NO_DUMMY,
+        .flags = SPI_DEVICE_NO_DUMMY | SPI_DEVICE_HALFDUPLEX,
     };
 
     ret = spi_bus_add_device(devspi->spi_host, &devcfg, &(devspi->dev_handle));
