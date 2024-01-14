@@ -7,6 +7,9 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "driver/ledc.h"
+
+#define TAG "tft_drivers"
 
 typedef struct
 {
@@ -62,10 +65,35 @@ void tftInit(TFTDev_t *dev)
         cmd++;
     }
 
-    /// Enable backlight
+    // 配置背光
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .duty_resolution = LEDC_TIMER_8_BIT,
+        .timer_num = LEDC_TIMER_0,
+        .freq_hz = 5000, // Set output frequency at 5 kHz
+        .clk_cfg = LEDC_USE_APB_CLK};
+
+    ledc_channel_config_t ledc_channel = {
+        .gpio_num = dev->pinbckl, // 背光引脚
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_0,
+        .intr_type = LEDC_INTR_DISABLE,
+        .timer_sel = LEDC_TIMER_0,
+        .duty = 100, // Set duty to 100%
+        .hpoint = 0};
+    ledc_timer_config(&ledc_timer);
+    ledc_channel_config(&ledc_channel);
+    // Enable backlight
+    tftSetBackLight(100);
     gpio_set_level(dev->pinbckl, 1);
 
     printf("LCD ST7796 initialization.\n");
+}
+
+void tftSetBackLight(unsigned char duty)
+{
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
 }
 
 void tftSetDirection(TFTDev_t *dev, DIRECTION direct)
@@ -97,11 +125,12 @@ void tftSetDirection(TFTDev_t *dev, DIRECTION direct)
             xycmd[1] = 0x20;
         }
     }
-    int ST7796_MAD_BGR = 0x08;
+    uint8_t ST7796_MAD_BGR = 0x08;
     xycmd[0] = 0x36;
     xycmd[1] = xycmd[1] | ST7796_MAD_BGR;
+
     spi_write_cmd(&dev->devspi, xycmd[0]);
-    spi_write_cmd(&dev->devspi, xycmd[1]);
+    spi_write_data(&dev->devspi, xycmd[1]);
 
     // 设置绘制区域
     tftSetWindow(dev, 0, 0, dev->width, dev->height);

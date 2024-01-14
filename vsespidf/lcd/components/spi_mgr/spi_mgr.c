@@ -51,6 +51,7 @@ bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
         .spics_io_num = devspi->pin_cs, // 中断发送，这里不用赋值，否则中断发送不出去
         .queue_size = 7,
         .pre_cb = spi_pre_transfer_callback, // Specify pre-transfer callback to handle D/C line
+        .post_cb = NULL,                     // 发送后回调
         .flags = SPI_DEVICE_NO_DUMMY | SPI_DEVICE_HALFDUPLEX,
     };
 

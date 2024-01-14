@@ -16,6 +16,8 @@
     "ff.h": "c",
     "sdkconfig.h": "c",
     "lvgl_sdcard.h": "c",
-    "lv_fs_if.h": "c"
+    "lv_fs_if.h": "c",
+    "string_view": "c",
+    "regex": "c"
   }
 }

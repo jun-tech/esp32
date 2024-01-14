@@ -16,6 +16,7 @@
     "utility": "c",
     "spi_mgr.h": "c",
     "bitset": "c",
-    "regex": "c"
+    "regex": "c",
+    "ledc.h": "c"
   }
 }

@@ -136,13 +136,13 @@ void app_main()
     spi_mgr_bus_init(&tftDev.devspi);
 
     // 将屏幕添加到总线80MHz
-    spi_mgr_bus_add_device(&tftDev.devspi, 40 * 1000 * 1000);
+    spi_mgr_bus_add_device(&tftDev.devspi, 80 * 1000 * 1000);
 
     // 屏幕初始化
     tftInit(&tftDev);
 
     // 屏幕方向
-    // tftSetDirection(&tftDev, DIRECTION90);
+    tftSetDirection(&tftDev, DIRECTION90);
 
     // 清屏
     tftClear(&tftDev, RED);

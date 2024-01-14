@@ -44,6 +44,7 @@ typedef struct tft_dev
 } TFTDev_t;
 
 void tftInit(TFTDev_t *dev);
+void tftSetBackLight(unsigned char duty); // 设置占空比0~256
 void tftSetWindow(TFTDev_t *dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 void tftSetDirection(TFTDev_t *dev, DIRECTION direct);
 void tftClear(TFTDev_t *dev, uint16_t color);
