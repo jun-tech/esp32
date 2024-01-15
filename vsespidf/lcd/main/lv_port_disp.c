@@ -149,6 +149,7 @@ static void IRAM_ATTR lvgl_spi_pre_transfer_callback(spi_transaction_t *t)
 {
     // int dc = (int)t->user;
     // ESP_LOGI(TAG, "dc: %d", dc);
+    // gpio_set_level(15, 0);
 }
 
 static void IRAM_ATTR lvgl_spi_post_transfer_callback(spi_transaction_t *t)
@@ -160,6 +161,8 @@ static void IRAM_ATTR lvgl_spi_post_transfer_callback(spi_transaction_t *t)
     {
         lv_disp_flush_ready(disp->driver);
     }
+
+    // gpio_set_level(15, 1);
 }
 
 // 往总线添加设备
@@ -194,7 +197,8 @@ bool lvgl_spi_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
 static void disp_init(void)
 {
     /*You code here*/
-    lvgl_spi_bus_add_device(&tftDev.devspi, 80 * 1000 * 1000);
+    // lvgl_spi_bus_add_device(&tftDev.devspi, 40 * 1000 * 1000);
+    lvgl_spi_bus_add_device(&tftDev.devspi, SPI_MASTER_FREQ_40M);
 
     // 屏幕初始化
     tftInit(&tftDev);

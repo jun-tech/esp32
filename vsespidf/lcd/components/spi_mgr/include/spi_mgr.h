@@ -35,6 +35,11 @@ bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz);
 bool spi_transaction_dma_init();
 
 /**
+ * 获取空闲transaction
+ */
+void idle_spi_transaction_dma(DevSPI_t *devspi, spi_transaction_t **idle_trans);
+
+/**
  * 发送数据
  * @param data 数据
  * @param data_length 数据个数
