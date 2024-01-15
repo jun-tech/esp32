@@ -18,6 +18,11 @@
     "lvgl_sdcard.h": "c",
     "lv_fs_if.h": "c",
     "string_view": "c",
-    "regex": "c"
+    "regex": "c",
+    "array": "c",
+    "bitset": "c",
+    "initializer_list": "c",
+    "ranges": "c",
+    "utility": "c"
   }
 }

@@ -30,6 +30,11 @@ void spi_mgr_bus_init(DevSPI_t *devspi);
 bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz);
 
 /**
+ * 初始化dma通道
+ */
+bool spi_transaction_dma_init();
+
+/**
  * 发送数据
  * @param data 数据
  * @param data_length 数据个数

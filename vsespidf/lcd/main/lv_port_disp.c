@@ -12,6 +12,13 @@
 #include "lv_port_disp.h"
 #include <stdbool.h>
 #include "tft_drivers.h"
+#include "driver/spi_master.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
 #include "esp_log.h"
 
 /*********************
@@ -107,7 +114,6 @@ void lv_port_disp_init(void)
     /*-----------------------------------
      * Register the display in LVGL
      *----------------------------------*/
-
     static lv_disp_drv_t disp_drv; /*Descriptor of a display driver*/
     lv_disp_drv_init(&disp_drv);   /*Basic initialization*/
 
@@ -138,11 +144,62 @@ void lv_port_disp_init(void)
 /**********************
  *   STATIC FUNCTIONS
  **********************/
+// spi传送前回调
+static void IRAM_ATTR lvgl_spi_pre_transfer_callback(spi_transaction_t *t)
+{
+    // int dc = (int)t->user;
+    // ESP_LOGI(TAG, "dc: %d", dc);
+}
 
+static void IRAM_ATTR lvgl_spi_post_transfer_callback(spi_transaction_t *t)
+{
+    // 发送完毕回调
+    lv_disp_t *disp = NULL;
+    disp = _lv_refr_get_disp_refreshing();
+    if (disp != NULL)
+    {
+        lv_disp_flush_ready(disp->driver);
+    }
+}
+
+// 往总线添加设备
+bool lvgl_spi_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
+{
+    esp_err_t ret;
+
+    ESP_LOGI(TAG, "CS=%d", devspi->pin_cs);
+    gpio_reset_pin(devspi->pin_cs);
+    gpio_set_direction(devspi->pin_cs, GPIO_MODE_OUTPUT);
+    gpio_set_level(devspi->pin_cs, 1);
+
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = clock_speed_hz,
+        .spics_io_num = devspi->pin_cs, // 中断发送，这里不用赋值，否则中断发送不出去
+        .queue_size = 6,
+        .pre_cb = lvgl_spi_pre_transfer_callback,   // Specify pre-transfer callback to handle D/C line
+        .post_cb = lvgl_spi_post_transfer_callback, // 发送后回调
+        .flags = SPI_DEVICE_NO_DUMMY | SPI_DEVICE_HALFDUPLEX,
+    };
+
+    ret = spi_bus_add_device(devspi->spi_host, &devcfg, &(devspi->dev_handle));
+    ESP_LOGI(TAG, "spi_bus_add_device=%d", ret);
+    assert(ret == ESP_OK);
+
+    // 初始化通道
+    spi_transaction_dma_init();
+
+    return true;
+}
 /*Initialize your display and the required peripherals.*/
 static void disp_init(void)
 {
     /*You code here*/
+    lvgl_spi_bus_add_device(&tftDev.devspi, 80 * 1000 * 1000);
+
+    // 屏幕初始化
+    tftInit(&tftDev);
+    // 90度
+    tftSetDirection(&tftDev, DIRECTION90);
 }
 
 volatile bool disp_flush_enabled = true;
@@ -176,10 +233,8 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
         uint32_t size = w * h * 2;
         spi_write_datas(&tftDev.devspi, (uint8_t *)color_p, size);
     }
-
-    /*IMPORTANT!!!
-     *Inform the graphics library that you are ready with the flushing*/
-    lv_disp_flush_ready(disp_drv);
+    // 可改用上面的spi回调，更方便异步传输
+    // lv_disp_flush_ready(disp_drv);
 }
 
 /*OPTIONAL: GPU INTERFACE*/

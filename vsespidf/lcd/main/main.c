@@ -96,8 +96,8 @@ static void gui_demo()
     // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    // lv_demo_benchmark();
-    lv_demo_stress();
+    lv_demo_benchmark();
+    // lv_demo_stress();
 }
 
 /* UI 任务 */
@@ -135,24 +135,24 @@ void app_main()
     // 设备总线注册
     spi_mgr_bus_init(&tftDev.devspi);
 
-    // 将屏幕添加到总线80MHz
-    spi_mgr_bus_add_device(&tftDev.devspi, 80 * 1000 * 1000);
+    // // 将屏幕添加到总线80MHz
+    // spi_mgr_bus_add_device(&tftDev.devspi, 80 * 1000 * 1000);
 
-    // 屏幕初始化
-    tftInit(&tftDev);
+    // // 屏幕初始化
+    // tftInit(&tftDev);
 
-    // 屏幕方向
-    tftSetDirection(&tftDev, DIRECTION90);
+    // // 屏幕方向
+    // tftSetDirection(&tftDev, DIRECTION90);
 
-    // 清屏
-    tftClear(&tftDev, RED);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    // // 清屏
+    // tftClear(&tftDev, RED);
+    // vTaskDelay(100 / portTICK_PERIOD_MS);
 
-    tftClear(&tftDev, GREEN);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    // tftClear(&tftDev, GREEN);
+    // vTaskDelay(100 / portTICK_PERIOD_MS);
 
-    tftClear(&tftDev, BLUE);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    // tftClear(&tftDev, BLUE);
+    // vTaskDelay(100 / portTICK_PERIOD_MS);
 
     ESP_LOGI(TAG, "lvgl start...");
 

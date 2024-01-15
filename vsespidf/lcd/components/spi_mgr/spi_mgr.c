@@ -10,6 +10,8 @@
 
 #define TAG "spi_mgr"
 
+static spi_transaction_t *pTransaction[8];
+
 void spi_mgr_bus_init(DevSPI_t *devspi)
 {
     esp_err_t ret;
@@ -31,11 +33,17 @@ void spi_mgr_bus_init(DevSPI_t *devspi)
 }
 
 // spi传送前回调
-void spi_pre_transfer_callback(spi_transaction_t *t)
+static void IRAM_ATTR spi_pre_transfer_callback(spi_transaction_t *t)
 {
     // int dc = (int)t->user;
     // ESP_LOGI(TAG, "dc: %d", dc);
 }
+
+static void IRAM_ATTR spi_post_transfer_callback(spi_transaction_t *t)
+{
+    // 发送完毕回调
+}
+
 // 往总线添加设备
 bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
 {
@@ -49,9 +57,9 @@ bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
     spi_device_interface_config_t devcfg = {
         .clock_speed_hz = clock_speed_hz,
         .spics_io_num = devspi->pin_cs, // 中断发送，这里不用赋值，否则中断发送不出去
-        .queue_size = 7,
-        .pre_cb = spi_pre_transfer_callback, // Specify pre-transfer callback to handle D/C line
-        .post_cb = NULL,                     // 发送后回调
+        .queue_size = 6,
+        .pre_cb = spi_pre_transfer_callback,   // Specify pre-transfer callback to handle D/C line
+        .post_cb = spi_post_transfer_callback, // 发送后回调
         .flags = SPI_DEVICE_NO_DUMMY | SPI_DEVICE_HALFDUPLEX,
     };
 
@@ -59,13 +67,27 @@ bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
     ESP_LOGI(TAG, "spi_bus_add_device=%d", ret);
     assert(ret == ESP_OK);
 
+    // 初始化通道
+    spi_transaction_dma_init();
+    return true;
+}
+
+bool spi_transaction_dma_init()
+{
+    // 初始化n个dma通道，这里可以优化dma池中，发送时获取空闲池进行发送
+    for (int i = 0; i < 8; i++)
+    {
+        pTransaction[i] = (spi_transaction_t *)heap_caps_malloc(sizeof(spi_transaction_t), MALLOC_CAP_DMA);
+    }
     return true;
 }
 
 bool spi_write_byte(DevSPI_t *devspi, const uint8_t *data, size_t data_length)
 {
-    spi_transaction_t t;
     esp_err_t ret;
+    static spi_transaction_t t;
+    // 这里可以优化事务池，从事务池中获取空闲
+    t = *pTransaction[0];
 
     if (data_length > 0)
     {
@@ -74,7 +96,7 @@ bool spi_write_byte(DevSPI_t *devspi, const uint8_t *data, size_t data_length)
         t.tx_buffer = data;
 #if 0
         // 以中断方式发送，添加设备时不用配置cs
-         gpio_set_level(devspi->pin_cs, 0); // 片选拉低
+        gpio_set_level(devspi->pin_cs, 0); // 片选拉低
         ret = spi_device_transmit(devspi->dev_handle, &t);
 #endif
 #if 1
