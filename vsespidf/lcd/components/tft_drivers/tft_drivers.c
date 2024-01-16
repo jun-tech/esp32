@@ -84,14 +84,14 @@ void tftInit(TFTDev_t *dev)
     ledc_timer_config(&ledc_timer);
     ledc_channel_config(&ledc_channel);
     // Enable backlight
-    tftSetBackLight(100);
     gpio_set_level(dev->pinbckl, 1);
 
     printf("LCD ST7796 initialization.\n");
 }
 
-void tftSetBackLight(unsigned char duty)
+void tftSetBackLight(TFTDev_t *dev, uint16_t precent)
 {
+    int duty = 256 * precent / 100;
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
 }

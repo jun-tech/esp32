@@ -10,8 +10,6 @@
 
 #define TAG "spi_mgr"
 
-static spi_transaction_t *pTransaction[2];
-
 void spi_mgr_bus_init(DevSPI_t *devspi)
 {
     esp_err_t ret;
@@ -67,54 +65,13 @@ bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
     ESP_LOGI(TAG, "spi_bus_add_device=%d", ret);
     assert(ret == ESP_OK);
 
-    // 初始化通道
-    spi_transaction_dma_init();
     return true;
 }
-
-bool spi_transaction_dma_init()
-{
-    // 初始化n个dma通道，这里可以优化dma池中，发送时获取空闲池进行发送
-    for (int i = 0; i < 2; i++)
-    {
-        pTransaction[i] = (spi_transaction_t *)heap_caps_malloc(sizeof(spi_transaction_t), MALLOC_CAP_DMA);
-    }
-    return true;
-}
-
-void idle_spi_transaction_dma(DevSPI_t *devspi, spi_transaction_t **idle_trans)
-{
-    spi_transaction_t *rtrans;
-    for (int i = 0; i < 2; i++)
-    {
-        esp_err_t ret = spi_device_get_trans_result(devspi->dev_handle, &rtrans, portMAX_DELAY);
-        if (ret == ESP_OK)
-        {
-            (*idle_trans) = rtrans;
-            return;
-        }
-    }
-    (*idle_trans) = NULL;
-    // When we are here, the SPI driver is busy (in the background) getting the transactions sent.
-    ESP_LOGI(TAG, "SPI driver is busy");
-}
-
-int i = 0;
 
 bool spi_write_byte(DevSPI_t *devspi, const uint8_t *data, size_t data_length)
 {
     esp_err_t ret;
-    // spi_transaction_t *rtrans;
-    // // 这里可以优化事务池，从事务池中获取空闲
-    // // t = *pTransaction[0];
-    // idle_spi_transaction_dma(devspi, &rtrans);
-    // spi_transaction_t t = *rtrans;
-    // spi_transaction_t t = *pTransaction[i++];
-    // if (i == 2)
-    // {
-    //     i = 0;
-    // }
-    spi_transaction_t t = *pTransaction[0];
+    spi_transaction_t t;
     if (data_length > 0)
     {
         memset(&t, 0, sizeof(spi_transaction_t));

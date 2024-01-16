@@ -135,26 +135,30 @@ void app_main()
     // 设备总线注册
     spi_mgr_bus_init(&tftDev.devspi);
 
-    // // 将屏幕添加到总线80MHz
-    // spi_mgr_bus_add_device(&tftDev.devspi, 80 * 1000 * 1000);
+    // 将屏幕添加到总线80MHz
+    spi_mgr_bus_add_device(&tftDev.devspi, 80 * 1000 * 1000);
 
-    // // 屏幕初始化
-    // tftInit(&tftDev);
+    // 屏幕初始化
+    tftInit(&tftDev);
 
-    // // 屏幕方向
-    // tftSetDirection(&tftDev, DIRECTION90);
+    // 设置背光
+    tftSetBackLight(&tftDev, 60);
 
-    // // 清屏
-    // tftClear(&tftDev, RED);
-    // vTaskDelay(100 / portTICK_PERIOD_MS);
+    // 屏幕方向
+    tftSetDirection(&tftDev, DIRECTION90);
 
-    // tftClear(&tftDev, GREEN);
-    // vTaskDelay(100 / portTICK_PERIOD_MS);
+    // 清屏
+    tftClear(&tftDev, RED);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
-    // tftClear(&tftDev, BLUE);
-    // vTaskDelay(100 / portTICK_PERIOD_MS);
+    tftClear(&tftDev, GREEN);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+    tftClear(&tftDev, BLUE);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
     ESP_LOGI(TAG, "lvgl start...");
 
-    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 20, NULL, 1, NULL, 0);
+    // xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 20, NULL, 1, NULL, 0);
+    xTaskCreate(gui_task, "gui task", 1024 * 20, NULL, 1, NULL);
 }

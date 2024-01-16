@@ -17,6 +17,7 @@
     "spi_mgr.h": "c",
     "bitset": "c",
     "regex": "c",
-    "ledc.h": "c"
+    "ledc.h": "c",
+    "lv_theme.h": "c"
   }
 }
