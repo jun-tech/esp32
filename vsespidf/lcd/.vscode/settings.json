@@ -19,6 +19,11 @@
     "regex": "c",
     "ledc.h": "c",
     "lv_theme.h": "c",
-    "string": "c"
-  }
+    "string": "c",
+    "tft_drivers.h": "c",
+    "freertos.h": "c",
+    "spi_master.h": "c",
+    "task.h": "c"
+  },
+  "idf.portWin": "COM4"
 }
