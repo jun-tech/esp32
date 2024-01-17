@@ -100,8 +100,12 @@ void lv_port_disp_init(void)
 
     /* Example for 2) */
     static lv_disp_draw_buf_t draw_buf_dsc_2;
-    static lv_color_t buf_2_1[LVGL_DISP_BUF_SIZE];                                /*A buffer for 10 rows*/
-    static lv_color_t buf_2_2[LVGL_DISP_BUF_SIZE];                                /*An other buffer for 10 rows*/
+    // static lv_color_t buf_2_1[LVGL_DISP_BUF_SIZE];                                /*A buffer for 10 rows*/
+    // static lv_color_t buf_2_2[LVGL_DISP_BUF_SIZE];                                /*An other buffer for 10 rows*/
+    // 改成dma
+    lv_color_t *buf_2_1 = heap_caps_malloc(LVGL_DISP_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
+    lv_color_t *buf_2_2 = heap_caps_malloc(LVGL_DISP_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
+
     lv_disp_draw_buf_init(&draw_buf_dsc_2, buf_2_1, buf_2_2, LVGL_DISP_BUF_SIZE); /*Initialize the display buffer*/
 
     // /* Example for 3) also set disp_drv.full_refresh = 1 below*/
