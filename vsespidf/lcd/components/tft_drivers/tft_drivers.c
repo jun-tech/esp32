@@ -193,3 +193,48 @@ void tftClear(TFTDev_t *dev, uint16_t color)
         // spi_write_data_words(devspi, datas, size);
     }
 }
+size_t frame = 0;
+uint8_t *dma_colors = NULL;
+void tftFillColors(TFTDev_t *dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, const uint8_t *colors)
+{
+    DevSPI_t *devspi = &dev->devspi;
+    // frame++;
+    // ESP_LOGI(TAG, "frame %d,area x1:%d,y1:%d,x2:%d,y2:%d", frame, x1, y1, x2, y2);
+    // // 计算区域
+    // uint16_t w = (x2 - x1 + 1);
+    // uint16_t h = (y2 - y1 + 1);
+    // // 分10等分发送
+    // uint16_t lines = h / 10;
+    // uint16_t size = w * lines;
+    // // dma存放颜色值
+    // if (dma_colors == NULL)
+    // {
+    //     dma_colors = heap_caps_malloc(size * sizeof(uint8_t), MALLOC_CAP_DMA);
+    // }
+    // uint8_t *dma_p;
+    // dma_p = dma_colors;
+    // // 发送块
+    // for (int y = 0; y < y2; y += lines)
+    // {
+    //     // 行块
+    //     for (int x = 0; x < size; x++)
+    //     {
+    //         if (colors != NULL)
+    //         {
+    //             *dma_colors++ = *colors++;
+    //         }
+    //     }
+    //     // 绘制区域
+    //     tftSetWindow(dev, x1, y1 + y, x2, y1 + y + lines - 1);
+    //     dma_colors = dma_p;
+    //     spi_write_datas(devspi, dma_colors, size * 2);
+    // }
+
+    // 一次发送
+    uint16_t w = (x2 - x1 + 1);
+    uint16_t h = (y2 - y1 + 1);
+    size_t size = w * h;
+    tftSetWindow(dev, x1, y1, x2, y2);
+    spi_queue_trans_datas(devspi, colors, size * 2);
+    spi_queue_trans_yield(devspi);
+}

@@ -57,4 +57,11 @@ bool spi_write_datas(DevSPI_t *devspi, const uint8_t *datas, int len);
  */
 bool spi_write_data_word(DevSPI_t *devspi, const uint16_t data, int len);
 bool spi_write_data_words(DevSPI_t *devspi, const uint16_t *datas, int len);
+
+/**
+ * 发送数据到队列
+ */
+bool spi_queue_trans_datas(DevSPI_t *devspi, const uint8_t *datas, int data_length);
+bool spi_queue_trans_yield(DevSPI_t *devspi);
+
 #endif

@@ -48,5 +48,5 @@ void tftSetBackLight(TFTDev_t *dev, uint16_t precent);
 void tftSetWindow(TFTDev_t *dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 void tftSetDirection(TFTDev_t *dev, DIRECTION direct);
 void tftClear(TFTDev_t *dev, uint16_t color);
-
+void tftFillColors(TFTDev_t *dev, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, const uint8_t *colors);
 #endif

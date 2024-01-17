@@ -18,6 +18,7 @@
     "bitset": "c",
     "regex": "c",
     "ledc.h": "c",
-    "lv_theme.h": "c"
+    "lv_theme.h": "c",
+    "string": "c"
   }
 }

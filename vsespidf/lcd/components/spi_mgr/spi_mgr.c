@@ -71,7 +71,7 @@ bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
 bool spi_write_byte(DevSPI_t *devspi, const uint8_t *data, size_t data_length)
 {
     esp_err_t ret;
-    spi_transaction_t t;
+    static spi_transaction_t t;
     if (data_length > 0)
     {
         memset(&t, 0, sizeof(spi_transaction_t));
@@ -82,13 +82,48 @@ bool spi_write_byte(DevSPI_t *devspi, const uint8_t *data, size_t data_length)
         gpio_set_level(devspi->pin_cs, 0); // 片选拉低
         ret = spi_device_transmit(devspi->dev_handle, &t);
 #endif
+
 #if 1
         // 以轮询方式发送
         ret = spi_device_polling_transmit(devspi->dev_handle, &t);
 #endif
+
+#if 0
+        ret = spi_device_queue_trans(devspi->dev_handle, &t, portMAX_DELAY);
+        assert(ret == ESP_OK);
+        // 1个队列，马上发出
+        spi_queue_trans_yield(devspi);
+#endif
+
         assert(ret == ESP_OK);
     }
 
+    return true;
+}
+
+bool spi_queue_trans_datas(DevSPI_t *devspi, const uint8_t *datas, int data_length)
+{
+    esp_err_t ret;
+    static spi_transaction_t t;
+    if (data_length > 0)
+    {
+        memset(&t, 0, sizeof(spi_transaction_t));
+        t.length = data_length * 8; // 每个数据8位，乘以数据长度，得出数据总长度
+        t.tx_buffer = datas;
+        // 队列方式发送
+        gpio_set_level(devspi->pin_dc, 1); // 发送数据，dc管脚设置1
+        ret = spi_device_queue_trans(devspi->dev_handle, &t, portMAX_DELAY);
+        assert(ret == ESP_OK);
+    }
+    return true;
+}
+
+bool spi_queue_trans_yield(DevSPI_t *devspi)
+{
+    esp_err_t ret;
+    spi_transaction_t *r_trans;
+    ret = spi_device_get_trans_result(devspi->dev_handle, &r_trans, portMAX_DELAY);
+    assert(ret == ESP_OK);
     return true;
 }
 

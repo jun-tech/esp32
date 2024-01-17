@@ -91,12 +91,12 @@ static void gui_demo()
     // lvgl_read_sdcard_test();
     // lvgl_bg_color_test();
     // lvgl_test();
-    lv_demo_widgets();
+    // lv_demo_widgets();
     // lv_demo_keypad_encoder();
     // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    // lv_demo_benchmark();
+    lv_demo_benchmark();
     // lv_demo_stress();
 }
 
@@ -142,7 +142,7 @@ void app_main()
     tftInit(&tftDev);
 
     // 设置背光
-    tftSetBackLight(&tftDev, 20);
+    tftSetBackLight(&tftDev, 30);
 
     // 屏幕方向
     tftSetDirection(&tftDev, DIRECTION90);
@@ -159,6 +159,6 @@ void app_main()
 
     ESP_LOGI(TAG, "lvgl start...");
 
-    // xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 20, NULL, 1, NULL, 0);
-    xTaskCreate(gui_task, "gui task", 1024 * 20, NULL, 1, NULL);
+    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 20, NULL, 1, NULL, 0);
+    // xTaskCreate(gui_task, "gui task", 1024 * 20, NULL, 1, NULL);
 }

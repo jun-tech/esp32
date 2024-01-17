@@ -173,13 +173,19 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
 {
     if (disp_flush_enabled)
     {
-        // 绘制区域
-        uint16_t w = lv_area_get_width(area);
-        uint16_t h = lv_area_get_height(area);
-        tftSetWindow(&tftDev, area->x1, area->y1, area->x2, area->y2);
-        // 计算要传输的数据大小
-        uint32_t size = w * h * 2;
-        spi_write_datas(&tftDev.devspi, (uint8_t *)color_p, size);
+        // 填充色彩，方式一
+        // uint16_t w = lv_area_get_width(area);
+        // // assert(w = (area->x2 - area->x1 + 1));
+        // uint16_t h = lv_area_get_height(area);
+        // // assert(h = (area->y2 - area->y1 + 1));
+        // tftSetWindow(&tftDev, area->x1, area->y1, area->x2, area->y2);
+        // // ESP_LOGI(TAG, "area %d,%d,%d,%d", area->x1, area->y1, area->x2, area->y2);
+        // // 计算要传输的数据大小
+        // uint32_t size = w * h * 2;
+        // spi_write_datas(&tftDev.devspi, (uint8_t *)color_p, size);
+
+        // 填充色彩，方式二
+        tftFillColors(&tftDev, area->x1, area->y1, area->x2, area->y2, (uint8_t *)color_p);
     }
     // 可改用上面的spi回调，更方便异步传输
     lv_disp_flush_ready(disp_drv);
