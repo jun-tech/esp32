@@ -243,3 +243,8 @@ https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/periph
 - [ ] Output Format 选Binary RGB565 SWAP
 - [ ] Options 勾选Dither images
 
+# espidf版本问题
+
+官方版https://github.com/lvgl/lvgl_esp32_drivers，使用的是4.x版本太旧了
+
+5.x以上https://github.com/hiruna/lvgl_esp32_drivers/tree/develop/lvgl_8.3.7_idf_5.2
