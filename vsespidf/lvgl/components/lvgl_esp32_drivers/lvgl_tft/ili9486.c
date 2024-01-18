@@ -16,17 +16,18 @@
 /*********************
  *      DEFINES
  *********************/
- #define TAG "ILI9486"
+#define TAG "ILI9486"
 
 /**********************
  *      TYPEDEFS
  **********************/
 
 /*The LCD needs a bunch of command/argument values to be initialized. They are stored in this struct. */
-typedef struct {
-    uint8_t cmd;
-    uint8_t data[16];
-    uint8_t databytes; //No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
+typedef struct
+{
+	uint8_t cmd;
+	uint8_t data[16];
+	uint8_t databytes; // No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
 } lcd_init_cmd_t;
 
 /**********************
@@ -35,8 +36,8 @@ typedef struct {
 static void ili9486_set_orientation(uint8_t orientation);
 
 static void ili9486_send_cmd(uint8_t cmd);
-static void ili9486_send_data(void * data, uint16_t length);
-static void ili9486_send_color(void * data, uint16_t length);
+static void ili9486_send_data(void *data, uint16_t length);
+static void ili9486_send_color(void *data, uint16_t length);
 
 /**********************
  *  STATIC VARIABLES
@@ -52,28 +53,28 @@ static void ili9486_send_color(void * data, uint16_t length);
 
 void ili9486_init(void)
 {
-	lcd_init_cmd_t ili_init_cmds[]={
+	lcd_init_cmd_t ili_init_cmds[] = {
 		{0x11, {0}, 0x80},
 		{0x3A, {0x55}, 1},
 		{0x2C, {0x44}, 1},
 		{0xC5, {0x00, 0x00, 0x00, 0x00}, 4},
 		{0xE0, {0x0F, 0x1F, 0x1C, 0x0C, 0x0F, 0x08, 0x48, 0x98, 0x37, 0x0A, 0x13, 0x04, 0x11, 0x0D, 0x00}, 15},
 		{0XE1, {0x0F, 0x32, 0x2E, 0x0B, 0x0D, 0x05, 0x47, 0x75, 0x37, 0x06, 0x10, 0x03, 0x24, 0x20, 0x00}, 15},
-		{0x20, {0}, 0},				/* display inversion OFF */
+		{0x20, {0}, 0}, /* display inversion OFF */
 		{0x36, {0x48}, 1},
-		{0x29, {0}, 0x80},			/* display on */
+		{0x29, {0}, 0x80}, /* display on */
 		{0x00, {0}, 0xff},
 	};
 
-	//Initialize non-SPI GPIOs
-    gpio_pad_select_gpio(ILI9486_DC);
+	// Initialize non-SPI GPIOs
+	esp_rom_gpio_pad_select_gpio(ILI9486_DC);
 	gpio_set_direction(ILI9486_DC, GPIO_MODE_OUTPUT);
 
 #if ILI9486_USE_RST
-    gpio_pad_select_gpio(ILI9486_RST);
+	esp_rom_gpio_pad_select_gpio(ILI9486_RST);
 	gpio_set_direction(ILI9486_RST, GPIO_MODE_OUTPUT);
 
-	//Reset the display
+	// Reset the display
 	gpio_set_level(ILI9486_RST, 0);
 	vTaskDelay(100 / portTICK_RATE_MS);
 	gpio_set_level(ILI9486_RST, 1);
@@ -82,24 +83,26 @@ void ili9486_init(void)
 
 	ESP_LOGI(TAG, "ILI9486 Initialization.");
 
-	//Send all the commands
+	// Send all the commands
 	uint16_t cmd = 0;
-	while (ili_init_cmds[cmd].databytes!=0xff) {
+	while (ili_init_cmds[cmd].databytes != 0xff)
+	{
 		ili9486_send_cmd(ili_init_cmds[cmd].cmd);
-		ili9486_send_data(ili_init_cmds[cmd].data, ili_init_cmds[cmd].databytes&0x1F);
-		if (ili_init_cmds[cmd].databytes & 0x80) {
+		ili9486_send_data(ili_init_cmds[cmd].data, ili_init_cmds[cmd].databytes & 0x1F);
+		if (ili_init_cmds[cmd].databytes & 0x80)
+		{
 			vTaskDelay(100 / portTICK_RATE_MS);
 		}
 		cmd++;
 	}
 
-    ili9486_set_orientation(CONFIG_LV_DISPLAY_ORIENTATION);
+	ili9486_set_orientation(CONFIG_LV_DISPLAY_ORIENTATION);
 }
 
-void ili9486_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
+void ili9486_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map)
 {
 	uint8_t data[4] = {0};
-    uint32_t size = 0;
+	uint32_t size = 0;
 
 	/*Column addresses*/
 	ili9486_send_cmd(0x2A);
@@ -122,7 +125,7 @@ void ili9486_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
 
 	size = lv_area_get_width(area) * lv_area_get_height(area);
 
-    ili9486_send_color((void*) color_map, size * 2);
+	ili9486_send_color((void *)color_map, size * 2);
 }
 
 /**********************
@@ -131,54 +134,52 @@ void ili9486_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
 static void ili9486_send_cmd(uint8_t cmd)
 {
 	uint8_t to16bit[] = {
-	    0x00, cmd
-        };
+		0x00, cmd};
 
 	disp_wait_for_pending_transactions();
-	gpio_set_level(ILI9486_DC, 0);	 /*Command mode*/
+	gpio_set_level(ILI9486_DC, 0); /*Command mode*/
 	disp_spi_send_data(to16bit, sizeof to16bit);
 }
 
-static void ili9486_send_data(void * data, uint16_t length)
+static void ili9486_send_data(void *data, uint16_t length)
 {
 	uint32_t i;
 	uint8_t to16bit[32];
-	uint8_t * dummy = data;
+	uint8_t *dummy = data;
 
-	for(i=0; i < (length); i++)
+	for (i = 0; i < (length); i++)
 	{
-	  to16bit[2*i+1] = dummy[i];
-	  to16bit[2*i] = 0x00;
+		to16bit[2 * i + 1] = dummy[i];
+		to16bit[2 * i] = 0x00;
 	}
 
 	disp_wait_for_pending_transactions();
-	gpio_set_level(ILI9486_DC, 1);	 /*Data mode*/
-	disp_spi_send_data(to16bit, (length*2));
+	gpio_set_level(ILI9486_DC, 1); /*Data mode*/
+	disp_spi_send_data(to16bit, (length * 2));
 }
 
-static void ili9486_send_color(void * data, uint16_t length)
+static void ili9486_send_color(void *data, uint16_t length)
 {
-    disp_wait_for_pending_transactions();
-    gpio_set_level(ILI9486_DC, 1);   /*Data mode*/
-    disp_spi_send_colors(data, length);
+	disp_wait_for_pending_transactions();
+	gpio_set_level(ILI9486_DC, 1); /*Data mode*/
+	disp_spi_send_colors(data, length);
 }
 
 static void ili9486_set_orientation(uint8_t orientation)
 {
-    // ESP_ASSERT(orientation < 4);
+	// ESP_ASSERT(orientation < 4);
 
-    const char *orientation_str[] = {
-        "PORTRAIT", "PORTRAIT_INVERTED", "LANDSCAPE", "LANDSCAPE_INVERTED"
-    };
+	const char *orientation_str[] = {
+		"PORTRAIT", "PORTRAIT_INVERTED", "LANDSCAPE", "LANDSCAPE_INVERTED"};
 
-    ESP_LOGI(TAG, "Display orientation: %s", orientation_str[orientation]);
+	ESP_LOGI(TAG, "Display orientation: %s", orientation_str[orientation]);
 
-#if defined (CONFIG_LV_PREDEFINED_DISPLAY_NONE)
-    uint8_t data[] = {0x48, 0x88, 0x28, 0xE8};
+#if defined(CONFIG_LV_PREDEFINED_DISPLAY_NONE)
+	uint8_t data[] = {0x48, 0x88, 0x28, 0xE8};
 #endif
 
-    ESP_LOGI(TAG, "0x36 command value: 0x%02X", data[orientation]);
+	ESP_LOGI(TAG, "0x36 command value: 0x%02X", data[orientation]);
 
-    ili9486_send_cmd(0x36);
-    ili9486_send_data((void *) &data[orientation], 1);
+	ili9486_send_cmd(0x36);
+	ili9486_send_data((void *)&data[orientation], 1);
 }

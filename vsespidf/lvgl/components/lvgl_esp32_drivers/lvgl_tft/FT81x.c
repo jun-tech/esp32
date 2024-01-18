@@ -9,28 +9,28 @@
 #include "EVE_commands.h"
 
 /* some pre-definded colors */
-#define RED		0xff0000UL
-#define ORANGE	0xffa500UL
-#define GREEN	0x00ff00UL
-#define BLUE	0x0000ffUL
-#define BLUE_1	0x5dade2L
-#define YELLOW	0xffff00UL
-#define PINK	0xff00ffUL
-#define PURPLE	0x800080UL
-#define WHITE	0xffffffUL
-#define BLACK	0x000000UL
+#define RED 0xff0000UL
+#define ORANGE 0xffa500UL
+#define GREEN 0x00ff00UL
+#define BLUE 0x0000ffUL
+#define BLUE_1 0x5dade2L
+#define YELLOW 0xffff00UL
+#define PINK 0xff00ffUL
+#define PURPLE 0x800080UL
+#define WHITE 0xffffffUL
+#define BLACK 0x000000UL
 
 /* memory-map defines */
-#define SCREEN_BITMAP_ADDR	0x00000000	// full screen buffer (0x00000000 - 0x000‭‭BBE40‬)
+#define SCREEN_BITMAP_ADDR 0x00000000 // full screen buffer (0x00000000 - 0x000‭‭BBE40‬)
 
 uint8_t tft_active = 0;
 
 void touch_calibrate(void)
 {
 
-/* send pre-recorded touch calibration values, depending on the display the code is compiled for */
+	/* send pre-recorded touch calibration values, depending on the display the code is compiled for */
 
-#if defined (EVE_CFAF240400C1_030SC)
+#if defined(EVE_CFAF240400C1_030SC)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x0000ed11);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x00001139);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff76809);
@@ -39,7 +39,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xfffadf2e);
 #endif
 
-#if defined (EVE_CFAF320240F_035T)
+#if defined(EVE_CFAF320240F_035T)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00005614);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0000009e);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff43422);
@@ -48,7 +48,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x00f8f2ef);
 #endif
 
-#if defined (EVE_CFAF480128A0_039TC)
+#if defined(EVE_CFAF480128A0_039TC)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00010485);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0000017f);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfffb0bd3);
@@ -57,7 +57,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x00069904);
 #endif
 
-#if defined (EVE_CFAF800480E0_050SC)
+#if defined(EVE_CFAF800480E0_050SC)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000107f9);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0xffffff8c);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff451ae);
@@ -66,7 +66,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xfffcfaaf);
 #endif
 
-#if defined (EVE_PAF90)
+#if defined(EVE_PAF90)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00000159);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x0001019c);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff93625);
@@ -75,7 +75,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x0000c101);
 #endif
 
-#if defined (EVE_RiTFT43)
+#if defined(EVE_RiTFT43)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000062cd);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0xfffffe45);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff45e0a);
@@ -84,7 +84,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFFbb870);
 #endif
 
-#if defined (EVE_EVE2_38)
+#if defined(EVE_EVE2_38)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x00007bed);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x000001b0);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfff60aa5);
@@ -93,7 +93,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x00829c08);
 #endif
 
-#if defined (EVE_EVE2_35G)
+#if defined(EVE_EVE2_35G)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000109E4);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x000007A6);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFEC1EBA);
@@ -102,7 +102,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFF469CF);
 #endif
 
-#if defined (EVE_EVE2_43G)
+#if defined(EVE_EVE2_43G)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x0000a1ff);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x00000680);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xffe54cc2);
@@ -111,7 +111,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xfffe628d);
 #endif
 
-#if defined (EVE_EVE2_50G)
+#if defined(EVE_EVE2_50G)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000109E4);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x000007A6);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFEC1EBA);
@@ -120,7 +120,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFF469CF);
 #endif
 
-#if defined (EVE_EVE2_70G)
+#if defined(EVE_EVE2_70G)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000105BC);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0xFFFFFA8A);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0x00004670);
@@ -129,7 +129,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xFFFF14C8);
 #endif
 
-#if defined (EVE_NHD_35)
+#if defined(EVE_NHD_35)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x0000f78b);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x00000427);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfffcedf8);
@@ -138,7 +138,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0x0009279e);
 #endif
 
-#if defined (EVE_RVT70)
+#if defined(EVE_RVT70)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000074df);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x000000e6);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xfffd5474);
@@ -147,7 +147,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 0xffe9a63c);
 #endif
 
-#if defined (EVE_FT811CB_HY50HD)
+#if defined(EVE_FT811CB_HY50HD)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 66353);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 712);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 4293876677);
@@ -156,7 +156,7 @@ void touch_calibrate(void)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_F, 418276);
 #endif
 
-#if defined (EVE_ADAM101)
+#if defined(EVE_ADAM101)
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_A, 0x000101E3);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_B, 0x00000114);
 	EVE_memWrite32(REG_TOUCH_TRANSFORM_C, 0xFFF5EEBA);
@@ -200,7 +200,7 @@ void touch_calibrate(void)
 	EVE_cmd_text(5, 75, 26, 0, "TOUCH_TRANSFORM_E:");
 	EVE_cmd_text(5, 90, 26, 0, "TOUCH_TRANSFORM_F:");
 
-#if defined (FT81X_ENABLE)
+#if defined(FT81X_ENABLE)
 	EVE_cmd_setbase(16L); /* FT81x only */
 	EVE_cmd_number(310, 15, 26, EVE_OPT_RIGHTX|8, touch_a);
 	EVE_cmd_number(310, 30, 26, EVE_OPT_RIGHTX|8, touch_b);
@@ -225,17 +225,16 @@ void touch_calibrate(void)
 #endif
 }
 
-
 // set up a display list for a fullscreen writable bitmap
 void TFT_bitmap_display(void)
 {
-	if(tft_active != 0)
+	if (tft_active != 0)
 	{
 		EVE_start_cmd_burst(); /* start writing to the cmd-fifo as one stream of bytes, only sending the address once */
 
 		EVE_cmd_dl(CMD_DLSTART); /* start the display list */
 
-		EVE_cmd_dl(DL_CLEAR_RGB | BLACK); /* set the default clear color to black */
+		EVE_cmd_dl(DL_CLEAR_RGB | BLACK);					/* set the default clear color to black */
 		EVE_cmd_dl(DL_CLEAR | CLR_COL | CLR_STN | CLR_TAG); /* clear the screen - this and the previous prevent artifacts between lists, Attributes are the color, stencil and tag buffers */
 
 		EVE_cmd_dl(TAG(0));
@@ -249,7 +248,7 @@ void TFT_bitmap_display(void)
 
 		EVE_cmd_dl(TAG(0));
 
-		EVE_cmd_dl(DL_DISPLAY);	/* instruct the graphics processor to show the list */
+		EVE_cmd_dl(DL_DISPLAY); /* instruct the graphics processor to show the list */
 
 		EVE_cmd_dl(CMD_SWAP); /* make this list active */
 
@@ -259,11 +258,10 @@ void TFT_bitmap_display(void)
 	}
 }
 
-
 void FT81x_init(void)
 {
 #if EVE_USE_PDN
-	gpio_pad_select_gpio(EVE_PDN);
+	esp_rom_gpio_pad_select_gpio(EVE_PDN);
 #endif
 
 	gpio_set_level(EVE_CS, 1);
@@ -274,39 +272,37 @@ void FT81x_init(void)
 
 	spi_acquire();
 
-	if(EVE_init())
+	if (EVE_init())
 	{
 		tft_active = 1;
 
-		EVE_memWrite8(REG_PWM_DUTY, 0x30);	/* setup backlight, range is from 0 = off to 0x80 = max */
+		EVE_memWrite8(REG_PWM_DUTY, 0x30); /* setup backlight, range is from 0 = off to 0x80 = max */
 
 		touch_calibrate();
 
-		EVE_cmd_memset(SCREEN_BITMAP_ADDR, BLACK, SCREEN_BUFFER_SIZE);		// clear screen buffer
+		EVE_cmd_memset(SCREEN_BITMAP_ADDR, BLACK, SCREEN_BUFFER_SIZE); // clear screen buffer
 		EVE_cmd_execute();
 
-		TFT_bitmap_display();	// set DL for fullscreen bitmap display
+		TFT_bitmap_display(); // set DL for fullscreen bitmap display
 	}
 
 	spi_release();
 }
 
-
 // write fullscreen bitmap directly
-void TFT_WriteScreen(uint8_t* Bitmap)
+void TFT_WriteScreen(uint8_t *Bitmap)
 {
 	EVE_memWrite_buffer(SCREEN_BITMAP_ADDR, Bitmap, SCREEN_BUFFER_SIZE, false);
 }
 
-
 // write bitmap directly, line-by-line
-void TFT_WriteBitmap(uint8_t* Bitmap, uint16_t X, uint16_t Y, uint16_t Width, uint16_t Height)
+void TFT_WriteBitmap(uint8_t *Bitmap, uint16_t X, uint16_t Y, uint16_t Width, uint16_t Height)
 {
 	// calc base address
 	uint32_t addr = SCREEN_BITMAP_ADDR + (Y * BYTES_PER_LINE) + (X * BYTES_PER_PIXEL);
 
 	// can we do a fast full width block transfer?
-	if(X == 0 && Width == EVE_HSIZE)
+	if (X == 0 && Width == EVE_HSIZE)
 	{
 		EVE_memWrite_buffer(addr, Bitmap, (Height * BYTES_PER_LINE), true);
 	}
@@ -323,7 +319,7 @@ void TFT_WriteBitmap(uint8_t* Bitmap, uint16_t X, uint16_t Y, uint16_t Width, ui
 }
 
 // LittlevGL flush callback
-void FT81x_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
+void FT81x_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map)
 {
-	TFT_WriteBitmap((uint8_t*)color_map, area->x1, area->y1, lv_area_get_width(area), lv_area_get_height(area));
+	TFT_WriteBitmap((uint8_t *)color_map, area->x1, area->y1, lv_area_get_width(area), lv_area_get_height(area));
 }

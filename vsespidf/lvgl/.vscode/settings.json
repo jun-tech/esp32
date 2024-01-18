@@ -23,6 +23,8 @@
     "bitset": "c",
     "initializer_list": "c",
     "ranges": "c",
-    "utility": "c"
-  }
+    "utility": "c",
+    "gpio.h": "c"
+  },
+  "idf.portWin": "COM4"
 }
