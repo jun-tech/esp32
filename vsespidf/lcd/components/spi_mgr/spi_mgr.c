@@ -33,13 +33,16 @@ void spi_mgr_bus_init(DevSPI_t *devspi)
 // spi传送前回调
 static void IRAM_ATTR spi_pre_transfer_callback(spi_transaction_t *t)
 {
-    // int dc = (int)t->user;
-    // ESP_LOGI(TAG, "dc: %d", dc);
+    // const static DRAM_ATTR UserData_t *user_data = (UserData_t *)t->user;
+    // gpio_set_level(user_data->devspi->pin_dc, user_data->data_mode);
+    // gpio_set_level(user_data->devspi->pin_cs, 0);
 }
 
+// spi发送完毕回调
 static void IRAM_ATTR spi_post_transfer_callback(spi_transaction_t *t)
 {
-    // 发送完毕回调
+    // const static DRAM_ATTR UserData_t *user_data = (UserData_t *)t->user;
+    // gpio_set_level(user_data->devspi->pin_cs, 0);
 }
 
 // 往总线添加设备
@@ -62,13 +65,13 @@ bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz)
     };
 
     ret = spi_bus_add_device(devspi->spi_host, &devcfg, &(devspi->dev_handle));
-    ESP_LOGI(TAG, "spi_bus_add_device=%d", ret);
+    ESP_LOGI(TAG, "spi_bus_add_tft_device=%d", ret);
     assert(ret == ESP_OK);
 
     return true;
 }
 
-bool spi_write_byte(DevSPI_t *devspi, const uint8_t *data, size_t data_length)
+bool spi_write_byte(DevSPI_t *devspi, uint8_t data_mode, const uint8_t *data, size_t data_length)
 {
     esp_err_t ret;
     static spi_transaction_t t;
@@ -77,6 +80,7 @@ bool spi_write_byte(DevSPI_t *devspi, const uint8_t *data, size_t data_length)
         memset(&t, 0, sizeof(spi_transaction_t));
         t.length = data_length * 8; // 每个数据8位，乘以数据长度，得出数据总长度
         t.tx_buffer = data;
+        // t.user = (void *)&user_data;
 #if 0
         // 以中断方式发送，添加设备时不用配置cs
         gpio_set_level(devspi->pin_cs, 0); // 片选拉低
@@ -130,20 +134,28 @@ bool spi_queue_trans_yield(DevSPI_t *devspi)
 bool spi_write_cmd(DevSPI_t *devspi, const uint8_t cmd)
 {
     gpio_set_level(devspi->pin_dc, 0); // 发送指令，dc管脚设置0
-    bool flag = spi_write_byte(devspi, &cmd, 1);
+    bool flag = spi_write_byte(devspi, SPI_CMD, &cmd, 1);
     assert(flag == true);
     return true;
 }
 
 bool spi_write_cmd_word(DevSPI_t *devspi, const uint16_t cmd)
 {
+    static uint8_t Byte[2];
+    Byte[0] = (cmd >> 8) & 0xFF;
+    Byte[1] = cmd & 0xFF;
+    gpio_set_level(devspi->pin_dc, 0);
+
+    bool flag = spi_write_byte(devspi, SPI_CMD, Byte, 2);
+    assert(flag == true);
+
     return true;
 }
 
 bool spi_write_data(DevSPI_t *devspi, const uint8_t data)
 {
     gpio_set_level(devspi->pin_dc, 1);
-    bool flag = spi_write_byte(devspi, &data, 1);
+    bool flag = spi_write_byte(devspi, SPI_DATA, &data, 1);
     assert(flag == true);
     return flag;
 }
@@ -151,7 +163,7 @@ bool spi_write_data(DevSPI_t *devspi, const uint8_t data)
 bool spi_write_datas(DevSPI_t *devspi, const uint8_t *datas, int len)
 {
     gpio_set_level(devspi->pin_dc, 1); // 发送数据，dc管脚设置1
-    bool flag = spi_write_byte(devspi, datas, len);
+    bool flag = spi_write_byte(devspi, SPI_DATA, datas, len);
     assert(flag == true);
     return true;
 }
@@ -163,7 +175,7 @@ bool spi_write_data_word(DevSPI_t *devspi, const uint16_t data, int len)
     Byte[1] = data & 0xFF;
     gpio_set_level(devspi->pin_dc, 1); // 发送数据，dc管脚设置1
 
-    bool flag = spi_write_byte(devspi, Byte, 2);
+    bool flag = spi_write_byte(devspi, SPI_DATA, Byte, 2);
     assert(flag == true);
 
     return true;
@@ -182,7 +194,7 @@ bool spi_write_data_words(DevSPI_t *devspi, const uint16_t *datas, int len)
         Byte[index++] = data & 0xFF;
         datas++;
     }
-    bool flag = spi_write_byte(devspi, Byte, len * 2); // 按字节发送后需要翻倍
+    bool flag = spi_write_byte(devspi, SPI_DATA, Byte, len * 2); // 按字节发送后需要翻倍
     assert(flag == true);
     return true;
 }

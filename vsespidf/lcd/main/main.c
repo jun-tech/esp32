@@ -36,15 +36,15 @@ TFTDev_t tftDev = {
         .pin_miso = -1,
         .pin_sclk = 14,
         .pin_cs = 15},
+    // 屏幕配置
     .width = TFT_WIDTH,
     .height = TFT_HEIGHT,
     .model = 0x7796,
     .offsetx = 0,
     .offsety = 0,
     .direction = DIRECTION0,
-    .pincs = 15,
-    .pinrst = 33,
-    .pinbckl = 32};
+    .pin_rst = 33,
+    .pin_bckl = 32};
 
 /*-----------------函数声明-----------------------------------*/
 void lvgl_bg_color_test(void);
@@ -135,9 +135,6 @@ void app_main()
     // 设备总线注册
     spi_mgr_bus_init(&tftDev.devspi);
 
-    // 将屏幕添加到总线80MHz
-    spi_mgr_bus_add_device(&tftDev.devspi, 80 * 1000 * 1000);
-
     // 屏幕初始化
     tftInit(&tftDev);
 
@@ -159,6 +156,6 @@ void app_main()
 
     ESP_LOGI(TAG, "lvgl start...");
 
-    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 4, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 6, NULL, 1, NULL, 0);
     // xTaskCreate(gui_task, "gui task", 1024 * 20, NULL, 1, NULL);
 }

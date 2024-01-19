@@ -40,7 +40,7 @@ static void gui_demo()
     // 开启sdcard
     // lvgl_read_sdcard_dir_test();
     // lvgl_read_sdcard_test();
-    lvgl_bg_color_test();
+    // lvgl_bg_color_test();
     // lvgl_test();
     // lv_demo_widgets();
     // lv_demo_keypad_encoder();
@@ -48,7 +48,7 @@ static void gui_demo()
     // lv_demo_printer();
     // 以下2案例性能测试
     // lv_demo_benchmark();
-    // lv_demo_stress();
+    lv_demo_stress();
 }
 
 // 定时器

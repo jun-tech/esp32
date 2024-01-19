@@ -37,9 +37,8 @@ typedef struct tft_dev
     DIRECTION direction;
 
     // 管脚
-    int pincs;
-    int pinrst;
-    int pinbckl;
+    int pin_rst;
+    int pin_bckl;
 
 } TFTDev_t;
 

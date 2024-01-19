@@ -20,6 +20,13 @@ typedef struct
 } DevSPI_t;
 
 /**
+ * @brief
+ * 传输数据还是命令
+ */
+#define SPI_CMD 0
+#define SPI_DATA 1
+
+/**
  * 初始化总线，若miso不需要接线可以配置为-1
  */
 void spi_mgr_bus_init(DevSPI_t *devspi);
@@ -31,10 +38,12 @@ bool spi_mgr_bus_add_device(DevSPI_t *devspi, int clock_speed_hz);
 
 /**
  * 发送数据
+ *
+ * @param mode 0表示命令，1表示数据
  * @param data 数据
  * @param data_length 数据个数
  */
-bool spi_write_byte(DevSPI_t *devspi, const uint8_t *data, size_t data_length);
+bool spi_write_byte(DevSPI_t *devspi, uint8_t data_mode, const uint8_t *data, size_t data_length);
 
 /**
  * 发送指令,字节形式发送8bit

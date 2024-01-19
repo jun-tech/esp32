@@ -102,17 +102,20 @@ DRAM_ATTR static const TFT_init_cmd_t tft_init_cmds[] = {
 
 void tftInit(TFTDev_t *dev)
 {
+    // 将屏幕添加到总线80MHz
+    spi_mgr_bus_add_device(&dev->devspi, /*80 * 1000 * 1000*/ SPI_MASTER_FREQ_80M);
+
     // Initialize non-SPI GPIOs
     gpio_config_t io_conf = {};
-    io_conf.pin_bit_mask = ((1ULL << dev->devspi.pin_dc) | (1ULL << dev->pinrst) | (1ULL << dev->pinbckl));
+    io_conf.pin_bit_mask = ((1ULL << dev->devspi.pin_dc) | (1ULL << dev->pin_rst) | (1ULL << dev->pin_bckl));
     io_conf.mode = GPIO_MODE_OUTPUT;
     io_conf.pull_up_en = true;
     gpio_config(&io_conf);
 
     // Reset the display
-    gpio_set_level(dev->pinrst, 0);
+    gpio_set_level(dev->pin_rst, 0);
     vTaskDelay(100 / portTICK_RATE_MS);
-    gpio_set_level(dev->pinrst, 1);
+    gpio_set_level(dev->pin_rst, 1);
     vTaskDelay(100 / portTICK_RATE_MS);
 
     // Send all the commands
@@ -138,7 +141,7 @@ void tftInit(TFTDev_t *dev)
         .clk_cfg = LEDC_USE_APB_CLK};
 
     ledc_channel_config_t ledc_channel = {
-        .gpio_num = dev->pinbckl, // 背光引脚
+        .gpio_num = dev->pin_bckl, // 背光引脚
         .speed_mode = LEDC_LOW_SPEED_MODE,
         .channel = LEDC_CHANNEL_0,
         .intr_type = LEDC_INTR_DISABLE,
@@ -148,7 +151,7 @@ void tftInit(TFTDev_t *dev)
     ledc_timer_config(&ledc_timer);
     ledc_channel_config(&ledc_channel);
     // Enable backlight
-    gpio_set_level(dev->pinbckl, 1);
+    gpio_set_level(dev->pin_bckl, 1);
 
     printf("LCD ST7796 initialization.\n");
 }
