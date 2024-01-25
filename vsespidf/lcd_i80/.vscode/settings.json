@@ -7,6 +7,7 @@
     "idf.flashType": "UART",
     "files.associations": {
         "bsp_lcd.h": "c",
-        "bsp_lcd_panels.h": "c"
+        "bsp_lcd_panels.h": "c",
+        "lv_demos.h": "c"
     }
 }

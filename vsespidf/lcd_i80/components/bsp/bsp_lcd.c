@@ -26,17 +26,17 @@ esp_lcd_panel_io_handle_t lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer
     /* 初始化背光 */
     // lcd_bl_init();
 
-    /* 初始化8080总线：16位数据，DC与WR脚 */
+    /* 初始化8080总线：8位数据，DC与WR脚 */
     esp_lcd_i80_bus_handle_t i80_bus = NULL;
     esp_lcd_i80_bus_config_t bus_config = {
-        // .clk_src = LCD_CLK_SRC_DEFAULT,
         .dc_gpio_num = BSP_LCD_DC_PIN,
         .wr_gpio_num = BSP_LCD_WR_PIN, // DC与WR引脚
         .data_gpio_nums = BSP_LCD_DATA_PINS,
-        .bus_width = 16,                     // 总线宽度16位
+        .bus_width = 8,                      // 总线宽度16位
         .max_transfer_bytes = transfer_size, // 缓冲区大小
     };
     esp_lcd_new_i80_bus(&bus_config, &i80_bus);
+    assert(i80_bus != NULL);
 
     /* 初始化LCD面板，使用上述8080总线，并设置CS引脚以及总线频率 */
     esp_lcd_panel_io_handle_t io_handle;
@@ -54,6 +54,7 @@ esp_lcd_panel_io_handle_t lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer
         .lcd_param_bits = 8, // 指令与指令参数的长度
     };
     esp_lcd_new_panel_io_i80(i80_bus, &io_config, &io_handle);
+    assert(io_handle != NULL);
 
     return io_handle;
 }
