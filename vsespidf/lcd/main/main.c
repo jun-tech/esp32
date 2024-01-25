@@ -96,8 +96,8 @@ static void gui_demo()
     // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    // lv_demo_benchmark();
-    lv_demo_stress();
+    lv_demo_benchmark();
+    // lv_demo_stress();
 }
 
 /* UI 任务 */

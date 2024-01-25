@@ -1,0 +1,12 @@
+{
+    "idf.adapterTargetName": "esp32",
+    "idf.openOcdConfigs": [
+        "board/esp32-bridge.cfg"
+    ],
+    "idf.portWin": "COM4",
+    "idf.flashType": "UART",
+    "files.associations": {
+        "bsp_lcd.h": "c",
+        "bsp_lcd_panels.h": "c"
+    }
+}
