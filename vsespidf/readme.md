@@ -10,5 +10,5 @@ https://zhuanlan.zhihu.com/p/630698425
 | ------- | ----- | ------------------------------------------------------------ |
 | lvgl    | 5.1.2 | 官方例子，spi协议集成lvgl，sdcard，xpt2046，st7796屏幕       |
 | lcd     | 4.4.5 | 个人编写驱动理解项目，spi协议集成lvgl                        |
-| lcd_i80 | 4.4.5 | 8080，16位并口，引用博主https://yuanze.wang/posts/lvgl-on-esp32s3/，感谢。8位并口转接板0欧姆电阻r4换到r5位，低8位。lvgl并口跑lv_demo_benchmark跑到n帧后假死，目前没找到原因。 |
+| lcd_i80 | 4.4.5 | 8080，16位并口，引用博主https://yuanze.wang/posts/lvgl-on-esp32s3/，感谢。8位并口转接板0欧姆电阻r4换到r5位，低8位。lvgl并口跑lv_demo_benchmark跑到n帧后假死（串口乱码），晶振需要将默认40Mhz改成自动。 |
 

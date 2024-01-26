@@ -24,7 +24,7 @@ static esp_err_t lcd_bl_init();
 esp_lcd_panel_io_handle_t lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer_size)
 {
     /* 初始化背光 */
-    // lcd_bl_init();
+    lcd_bl_init();
 
     /* 初始化8080总线：8位数据，DC与WR脚 */
     esp_lcd_i80_bus_handle_t i80_bus = NULL;
@@ -103,13 +103,13 @@ void lcd_disp_switch(const esp_lcd_panel_io_handle_t io, bool sw)
     if (sw)
     {
         esp_lcd_panel_io_tx_param(io, 0x29, NULL, 0); // 开显示
-        // lcd_bl_set(40); //打开背光
+        lcd_bl_set(40);                               // 打开背光
         ESP_LOGW(TAG, "display on");
     }
     else
     {
         esp_lcd_panel_io_tx_param(io, 0x28, NULL, 0); // 关显示
-        // lcd_bl_set(0); //关闭背光
+        lcd_bl_set(0);                                // 关闭背光
         ESP_LOGW(TAG, "display off");
     }
 }
