@@ -20,7 +20,6 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
     lcd_draw_rect(disp_drv->user_data, area->x1, area->y1, area->x2, area->y2, color_p);
     /* 通知lvgl传输已完成 */
     lv_disp_flush_ready(disp_drv);
-    ESP_LOGE(TAG, "flush");
 }
 
 void lv_port_disp_init()

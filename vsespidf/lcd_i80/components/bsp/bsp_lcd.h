@@ -15,9 +15,9 @@
 #define BSP_LCD_DC_PIN 15
 #define BSP_LCD_WR_PIN 16
 #define BSP_LCD_RST_PIN 17
-#define BSP_LCD_DATA_PINS           \
-    {                               \
-        5, 18, 19, 21, 3, 1, 22, 23 \
+#define BSP_LCD_DATA_PINS                         \
+    {                                             \
+        5, 18, 19, 21, 25 /*3*/, 33 /*1*/, 22, 23 \
     }
 // 16位
 //  13, 12, 14, 27, 26, 25, 33, 32

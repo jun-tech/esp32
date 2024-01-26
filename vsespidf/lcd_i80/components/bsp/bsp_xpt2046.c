@@ -47,12 +47,27 @@ uint8_t avg_last;
 /**
  * Initialize the XPT2046
  */
+static uint16_t XPT2046_CS_PIN = -1;
 
-void xpt2046_init(spi_host_device_t host, uint16_t cs, uint16_t pen_irq)
+void xpt2046_init(spi_host_device_t host, uint16_t pin_cs, uint16_t pen_irq)
 {
     ESP_LOGI(TAG, "XPT2046 Initialization");
-    // 添加总线
-    bsp_spi_add_device(host, 1 * 1000 * 1000, cs);
+    XPT2046_CS_PIN = pin_cs;
+    ESP_LOGI(TAG, "CS=%d", pin_cs);
+    // xpt2040设备添加至总线
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = 1 * 1000 * 1000,
+        .mode = 1,
+        .spics_io_num = XPT2046_CS_PIN, // CS pin
+        .queue_size = 1,
+        .pre_cb = NULL,
+        .post_cb = NULL,
+        .command_bits = 8,
+        .address_bits = 0,
+        .dummy_bits = 0,
+        .flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_NO_DUMMY,
+    };
+    bsp_spi_add_device(host, &devcfg);
     // 配置触摸屏
     gpio_config_t irq_config = {
         .pin_bit_mask = BIT64(pen_irq),
@@ -76,7 +91,6 @@ bool xpt2046_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
     if (xpt2048_is_touch_detected() == TOUCH_DETECTED)
     {
         valid = true;
-
         x = xpt2046_cmd(CMD_X_READ);
         y = xpt2046_cmd(CMD_Y_READ);
         ESP_LOGI(TAG, "P(%d,%d)", x, y);

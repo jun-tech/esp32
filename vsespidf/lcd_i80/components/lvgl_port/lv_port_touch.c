@@ -8,7 +8,6 @@ lv_indev_t *indev_touchpad;
 
 static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 {
-    ESP_LOGE("HHH", "HHHHHH");
     bool res = false;
     res = xpt2046_read(indev_drv, data);
     data->continue_reading = res;

@@ -26,25 +26,10 @@ void bsp_spi_bus_init(spi_host_device_t host, uint16_t pin_miso, uint16_t pin_mo
     assert(ret == ESP_OK);
 }
 
-void bsp_spi_add_device(spi_host_device_t host, uint32_t clock_speed_hz, uint16_t pin_cs)
+void bsp_spi_add_device(spi_host_device_t host, spi_device_interface_config_t *devcfg)
 {
     esp_err_t ret;
-
-    ESP_LOGI(TAG, "CS=%d", pin_cs);
-    gpio_reset_pin(pin_cs);
-    gpio_set_direction(pin_cs, GPIO_MODE_OUTPUT);
-    gpio_set_level(pin_cs, 1);
-
-    spi_device_interface_config_t devcfg = {
-        .clock_speed_hz = clock_speed_hz,
-        .spics_io_num = pin_cs,
-        .queue_size = 1,
-        .pre_cb = NULL,
-        .post_cb = NULL,
-        .flags = SPI_DEVICE_NO_DUMMY | SPI_DEVICE_HALFDUPLEX,
-    };
-
-    ret = spi_bus_add_device(host, &devcfg, &spi);
+    ret = spi_bus_add_device(host, devcfg, &spi);
     ESP_LOGI(TAG, "spi_bus_add_device=%d", ret);
     assert(ret == ESP_OK);
 }
