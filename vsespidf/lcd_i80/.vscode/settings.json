@@ -8,6 +8,11 @@
     "files.associations": {
         "bsp_lcd.h": "c",
         "bsp_lcd_panels.h": "c",
-        "lv_demos.h": "c"
+        "lv_demos.h": "c",
+        "lvgl.h": "c",
+        "lv_port_touch.h": "c",
+        "bsp_xpt2046.h": "c",
+        "bsp_spi.h": "c",
+        "sdkconfig.h": "c"
     }
 }

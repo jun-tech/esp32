@@ -24,7 +24,11 @@
     "initializer_list": "c",
     "ranges": "c",
     "utility": "c",
-    "gpio.h": "c"
+    "gpio.h": "c",
+    "xpt2046.h": "c",
+    "touch_driver.h": "c",
+    "tp_spi.h": "c",
+    "i2c_manager.h": "c"
   },
   "idf.portWin": "COM4"
 }
