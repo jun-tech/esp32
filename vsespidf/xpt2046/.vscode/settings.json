@@ -1,0 +1,11 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "files.associations": {
+    "bsp_xpt2046.h": "c",
+    "spi_master.h": "c",
+    "*.ipp": "c"
+  },
+  "idf.portWin": "COM6",
+  "idf.flashType": "UART",
+  "idf.adapterTargetName": "esp32"
+}

@@ -3,7 +3,7 @@
     "idf.openOcdConfigs": [
         "board/esp32-bridge.cfg"
     ],
-    "idf.portWin": "COM4",
+    "idf.portWin": "COM6",
     "idf.flashType": "UART",
     "files.associations": {
         "bsp_lcd.h": "c",
@@ -13,6 +13,7 @@
         "lv_port_touch.h": "c",
         "bsp_xpt2046.h": "c",
         "bsp_spi.h": "c",
-        "sdkconfig.h": "c"
+        "sdkconfig.h": "c",
+        "lv_port_tick.h": "c"
     }
 }

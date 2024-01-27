@@ -17,13 +17,13 @@ static const uint16_t screenWidth = TFT_WIDTH;
 static const uint16_t screenHeight = TFT_HEIGHT;
 
 TFT_eSPI tft = TFT_eSPI(screenWidth, screenHeight); /* TFT instance */
-XPT2046_Touchscreen ts(TOUCH_CS);                   // Param 2 - NULL - No interrupts
+// XPT2046_Touchscreen ts(TOUCH_CS);                   // Param 2 - NULL - No interrupts
 
-void touch_xpt2046_init(void)
-{
-  ts.begin();
-  ts.setRotation(3);
-}
+// void touch_xpt2046_init(void)
+// {
+//   ts.begin();
+//   ts.setRotation(3);
+// }
 
 #if LV_USE_LOG != 0
 /* Serial debugging */
@@ -150,7 +150,7 @@ void setup()
   //    the Generic -> Touch_calibrate example from the TFT_eSPI library*/
   // uint16_t calData[5] = {275, 3620, 264, 3532, 1};
   // tft.setTouch(calData);
-  touch_xpt2046_init();
+  // touch_xpt2046_init();
 
   /*Create a display buffer*/
   // 单buffer除10相当于分10等分刷新全屏

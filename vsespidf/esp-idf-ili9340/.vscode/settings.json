@@ -11,5 +11,7 @@
         "decode_png.h": "c",
         "tjpgd.h": "c",
         "decode_jpeg.h": "c"
-    }
+    },
+    "workbench.editor.enablePreview": false,
+    "idf.portWin": "COM6"
 }

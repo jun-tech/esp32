@@ -36,6 +36,9 @@ int16_t avg_buf_x[XPT2046_AVG];
 int16_t avg_buf_y[XPT2046_AVG];
 uint8_t avg_last;
 
+static uint16_t XPT2046_CS_PIN = -1;
+static uint16_t XPT2046_IRQ = -1;
+static spi_device_handle_t tp2046_spi;
 /**********************
  *      MACROS
  **********************/
@@ -47,27 +50,29 @@ uint8_t avg_last;
 /**
  * Initialize the XPT2046
  */
-static uint16_t XPT2046_CS_PIN = -1;
-
 void xpt2046_init(spi_host_device_t host, uint16_t pin_cs, uint16_t pen_irq)
 {
     ESP_LOGI(TAG, "XPT2046 Initialization");
     XPT2046_CS_PIN = pin_cs;
-    ESP_LOGI(TAG, "CS=%d", pin_cs);
+    XPT2046_IRQ = pen_irq;
+    ESP_LOGI(TAG, "CS=%d，IRQ=%d", pin_cs, pen_irq);
     // xpt2040设备添加至总线
     spi_device_interface_config_t devcfg = {
         .clock_speed_hz = 1 * 1000 * 1000,
-        .mode = 1,
-        .spics_io_num = XPT2046_CS_PIN, // CS pin
+        .spics_io_num = pin_cs, // CS pin
         .queue_size = 1,
-        .pre_cb = NULL,
-        .post_cb = NULL,
+        // .pre_cb = NULL,
+        // .post_cb = NULL,
         .command_bits = 8,
         .address_bits = 0,
         .dummy_bits = 0,
         .flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_NO_DUMMY,
     };
-    bsp_spi_add_device(host, &devcfg);
+    esp_err_t ret;
+    ret = spi_bus_add_device(host, &devcfg, &tp2046_spi);
+    ESP_LOGI(TAG, "spi_bus_add_device=%d", ret);
+    assert(ret == ESP_OK);
+#if XPT2046_TOUCH_IRQ || XPT2046_TOUCH_IRQ_PRESS
     // 配置触摸屏
     gpio_config_t irq_config = {
         .pin_bit_mask = BIT64(pen_irq),
@@ -76,8 +81,9 @@ void xpt2046_init(spi_host_device_t host, uint16_t pin_cs, uint16_t pen_irq)
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
-    esp_err_t ret = gpio_config(&irq_config);
+    ret = gpio_config(&irq_config);
     assert(ret == ESP_OK);
+#endif
 }
 
 bool xpt2046_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
@@ -125,13 +131,16 @@ bool xpt2046_read(lv_indev_drv_t *drv, lv_indev_data_t *data)
 static xpt2046_touch_detect_t xpt2048_is_touch_detected()
 {
     // check IRQ pin if we IRQ or IRQ and preessure
+#if XPT2046_TOUCH_IRQ || XPT2046_TOUCH_IRQ_PRESS
     uint8_t irq = gpio_get_level(XPT2046_IRQ);
 
     if (irq != 0)
     {
         return TOUCH_NOT_DETECTED;
     }
+#endif
     // check pressure if we are pressure or IRQ and pressure
+#if XPT2046_TOUCH_PRESS || XPT2046_TOUCH_IRQ_PRESS
     int16_t z1 = xpt2046_cmd(CMD_Z1_READ) >> 3;
     int16_t z2 = xpt2046_cmd(CMD_Z2_READ) >> 3;
 
@@ -143,13 +152,15 @@ static xpt2046_touch_detect_t xpt2048_is_touch_detected()
     {
         return TOUCH_NOT_DETECTED;
     }
+#endif
+
     return TOUCH_DETECTED;
 }
 
 static int16_t xpt2046_cmd(uint8_t cmd)
 {
     uint8_t data[2];
-    bsp_spi_read_reg(cmd, data, 2);
+    bsp_spi_read_reg(&tp2046_spi, cmd, data, 2);
     int16_t val = (data[0] << 8) | data[1];
     return val;
 }
