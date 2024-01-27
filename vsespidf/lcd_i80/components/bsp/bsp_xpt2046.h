@@ -19,8 +19,8 @@
 #define XPT2046_X_MAX 1900
 #define XPT2046_Y_MAX 1900
 #define XPT2046_X_INV 0
-#define XPT2046_Y_INV 1
-#define XPT2046_XY_SWAP 0
+#define XPT2046_Y_INV 0 // 调整横竖屏坐标
+#define XPT2046_XY_SWAP 1
 #define XPT2046_TOUCH_THRESHOLD 400 // Threshold for touch detection
 #define XPT2046_TOUCH_IRQ 1
 #define XPT2046_TOUCH_IRQ_PRESS 0

@@ -10,9 +10,9 @@
 #define LCD_X_PIXELS 320
 #define LCD_Y_PIXELS 480
 
-#define BSP_LCD_BL_PIN 4
-#define BSP_LCD_CS_PIN 2
-#define BSP_LCD_DC_PIN 15
+#define BSP_LCD_BL_PIN 15
+#define BSP_LCD_CS_PIN 4
+#define BSP_LCD_DC_PIN 2
 #define BSP_LCD_WR_PIN 16
 #define BSP_LCD_RST_PIN 17
 #define BSP_LCD_DATA_PINS                         \
