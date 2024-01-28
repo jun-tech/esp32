@@ -140,11 +140,36 @@ void lvgl_read_sdcard_test(void)
     lv_scr_load(page2);
 }
 
-void app_main(void)
+/* LVGL 移植部分 */
+static void lv_tick_task(void *arg)
 {
-    TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xPeriod = pdMS_TO_TICKS(10);
+    (void)arg;
+    lv_tick_inc(portTICK_PERIOD_MS);
+}
+SemaphoreHandle_t xGuiSemaphore;
 
+static void gui_demo()
+{
+    // 开启sdcard
+    // lvgl_read_sdcard_dir_test();
+    // lvgl_read_sdcard_test();
+    // lvgl_bg_color_test();
+    // lvgl_test();
+    // lv_demo_widgets();
+    // lv_demo_keypad_encoder();
+    lv_demo_music();
+    // lv_demo_printer();
+    // 以下2案例性能测试
+    // lv_demo_benchmark();
+    // lv_demo_stress();
+}
+
+/* UI 任务 */
+static void gui_task(void *arg)
+{
+    xGuiSemaphore = xSemaphoreCreateMutex();
+
+    // 初始化========================================================
     // spi总线
     bsp_spi_bus_init(BUS_SPI_HOST, CONFIG_SPI_PIN_MISO /* miso */, CONFIG_SPI_PIN_MOSI /* mosi */, CONFIG_SPI_PIN_CLK /*sck*/);
 
@@ -165,20 +190,37 @@ void app_main(void)
     // lvgl 初始化
     lv_init();
     lv_port_disp_init();
-    // lv_fs_if_init(); // spi 总线在此初始化，sdcard 初始化
+    lv_fs_if_init(); // sdcard 初始化
     lv_port_touch_init(BUS_SPI_HOST);
-    lv_create_tick();
+    // 初始化========================================================
 
-    // 演示
-    // lv_demo_widgets();
-    lv_demo_music();
-    // lv_demo_benchmark();
-    // lv_demo_stress();
-    // lvgl_read_sdcard_test();
+    esp_register_freertos_tick_hook((void *)lv_tick_task);
+
+    gui_demo();
+    ESP_LOGI("main", "begin timer");
+    // 读sdcard，自动切屏
+#if 0
+    lv_tm = lv_timer_create(lv_tm_cb, 3000, 0);
+#endif
 
     while (1)
     {
-        lv_timer_handler();
-        vTaskDelayUntil(&xLastWakeTime, xPeriod);
+        /* Delay 1 tick (assumes FreeRTOS tick is 10ms */
+        vTaskDelay(pdMS_TO_TICKS(10));
+
+        /* Try to take the semaphore, call lvgl related function on success */
+        if (pdTRUE == xSemaphoreTake(xGuiSemaphore, portMAX_DELAY))
+        {
+            lv_timer_handler();
+            xSemaphoreGive(xGuiSemaphore);
+        }
     }
+
+    vTaskDelete(NULL);
+}
+
+// 主函数
+void app_main(void)
+{
+    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 4, NULL, 1, NULL, 0);
 }
