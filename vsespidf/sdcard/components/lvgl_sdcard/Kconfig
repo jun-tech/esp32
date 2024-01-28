@@ -1,0 +1,57 @@
+#******************************Kconfig.projbuild文件内容*******************************************
+menu "SDCard SPI onfiguration"
+
+    config SDCARD_FORMAT_IF_MOUNT_FAILED
+        bool "Format the card if mount failed"
+        default n
+        help
+            If this config item is set, format_if_mount_failed will be set to true and the card will be formatted if
+            the mount has failed.
+
+    config SDCARD_SPI_DMA_CHAN
+        int "SPI DMA CHAN"
+        default 2 if IDF_TARGET_ESP32
+        default 1 if IDF_TARGET_ESP32S2
+        default 1 if IDF_TARGET_ESP32S3
+        default 1  # C3 and others
+        help
+            ESP32 spi include hspi and vspi. lvgl use 1 so sdcard use 2.
+    
+    config SDCARD_SPI_HOST
+        int "SPI HOST"
+        default 3 if IDF_TARGET_ESP32
+        default 1 if IDF_TARGET_ESP32S2
+        default 1 if IDF_TARGET_ESP32S3
+        default 1  # C3 and others
+        help
+            ESP32 spi include hspi and vspi. lvgl use SPI2_HOST so sdcard use SPI3_HOST. spi2 value 1, spi3 value 3
+
+    config SDCARD_PIN_MOSI
+        int "MOSI GPIO number"
+        default 23 if IDF_TARGET_ESP32
+        default 35 if IDF_TARGET_ESP32S2
+        default 35 if IDF_TARGET_ESP32S3
+        default 4  # C3 and others
+
+    config SDCARD_PIN_MISO
+        int "MISO GPIO number"
+        default 19 if IDF_TARGET_ESP32
+        default 37 if IDF_TARGET_ESP32S2
+        default 37 if IDF_TARGET_ESP32S3
+        default 6  # C3 and others
+
+    config SDCARD_PIN_CLK
+        int "CLK GPIO number"
+        default 18 if IDF_TARGET_ESP32
+        default 36 if IDF_TARGET_ESP32S2
+        default 36 if IDF_TARGET_ESP32S3
+        default 5  # C3 and others
+
+    config SDCARD_PIN_CS
+        int "CS GPIO number"
+        default 5 if IDF_TARGET_ESP32
+        default 34 if IDF_TARGET_ESP32S2
+        default 34 if IDF_TARGET_ESP32S3
+        default 1  # C3 and others
+
+endmenu

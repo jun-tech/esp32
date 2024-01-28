@@ -1,0 +1,8 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "files.associations": {
+    "lvgl_sdcard.h": "c"
+  },
+  "idf.portWin": "COM4",
+  "idf.flashType": "UART"
+}

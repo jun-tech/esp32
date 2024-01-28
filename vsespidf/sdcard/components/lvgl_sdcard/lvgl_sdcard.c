@@ -21,11 +21,11 @@ static const char *TAG = "sdcard";
 // DMA 1被 lvgl 使用，改用2
 #define SPI_DMA_CHAN CONFIG_SDCARD_SPI_DMA_CHAN
 // SPI2 已经被lvgl占用换3
-#if CONFIG_SDCARD_SPI_HOST == 0
+#if SOC_SPI_PERIPH_NUM == 0
 #define SD_SPI_HOST SPI1_HOST
-#elif CONFIG_SDCARD_SPI_HOST == 1
+#elif SOC_SPI_PERIPH_NUM == 1
 #define SD_SPI_HOST SPI2_HOST
-#elif CONFIG_SDCARD_SPI_HOST > 2
+#elif SOC_SPI_PERIPH_NUM > 2
 #define SD_SPI_HOST SPI3_HOST
 #else
 #define SD_SPI_HOST SPI2_HOST
@@ -64,27 +64,33 @@ esp_err_t sdcard_init(void)
 
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
     // 此处更改成5000，否则报ESP_ERR_INVALID_CRC错误
-    // host.max_freq_khz = 5000; // 降频
+    // host.max_freq_khz = 5000;
     host.max_freq_khz = 20000; // 20MHz
-    // SPI2
+    // SPI2 已经被lvgl占用换3
     host.slot = SD_SPI_HOST;
 
+    // spi 4线上拉
+    // gpio_set_pull_mode(PIN_NUM_MOSI, GPIO_PULLUP_ONLY);
+    // gpio_set_pull_mode(PIN_NUM_MISO, GPIO_PULLUP_ONLY);
+    // gpio_set_pull_mode(PIN_NUM_CLK, GPIO_PULLUP_ONLY);
+    // gpio_set_pull_mode(CONFIG_SDCARD_PIN_CS, GPIO_PULLUP_ONLY);
+
     // 外部已经初始化，所以注释掉，共用HSPI
-    // spi_bus_config_t bus_cfg = {
-    //     .mosi_io_num = PIN_NUM_MOSI,
-    //     .miso_io_num = PIN_NUM_MISO,
-    //     .sclk_io_num = PIN_NUM_CLK,
-    //     .quadwp_io_num = -1,
-    //     .quadhd_io_num = -1,
-    //     .max_transfer_sz = 4000,
-    // };
-    // // SPI总线初始化
-    // ret = spi_bus_initialize(host.slot, &bus_cfg, SPI_DMA_CHAN);
-    // if (ret != ESP_OK)
-    // {
-    //     ESP_LOGE(TAG, "Failed to initialize bus.");
-    //     return ret;
-    // }
+    spi_bus_config_t bus_cfg = {
+        .mosi_io_num = PIN_NUM_MOSI,
+        .miso_io_num = PIN_NUM_MISO,
+        .sclk_io_num = PIN_NUM_CLK,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = 4000,
+    };
+    // SPI总线初始化
+    ret = spi_bus_initialize(host.slot, &bus_cfg, SPI_DMA_CHAN);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to initialize bus.");
+        return ret;
+    }
 
     // 这将初始化没有卡检测（CD）和写保护（WP）信号的插槽。
     // 如果您的主板有这些信号，请修改slot_config.gpio_cd和slot_config.gpio_wp。
@@ -113,6 +119,5 @@ esp_err_t sdcard_init(void)
 
     // Card has been initialized, print its properties
     sdmmc_card_print_info(stdout, card);
-
     return ret;
 }

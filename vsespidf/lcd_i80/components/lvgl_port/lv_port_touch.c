@@ -16,7 +16,7 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
 void lv_port_touch_init(spi_host_device_t host)
 {
     // 触摸屏初始化
-    xpt2046_init(host, 27 /*cs*/, 26 /*pen*/);
+    xpt2046_init(host, 25 /*cs*/, 35 /*pen*/);
     // lvgl输入设备驱动
     static lv_indev_drv_t indev_drv;
     lv_indev_drv_init(&indev_drv);

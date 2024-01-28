@@ -61,6 +61,13 @@
 
 Swap XY.选项去掉打勾	Invert X coordinate value.选项去掉打勾	Invert Y coordinate value.选项打勾
 
+| SDCARD | ESP32  |      |
+| ------ | ------ | ---- |
+| CS     | GPIO5  |      |
+| MOSI   | GPIO23 |      |
+| CLK    | GPIO18 |      |
+| MISO   | GPIO19 |      |
+
 
 
 # 编译修复错误

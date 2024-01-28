@@ -56,6 +56,7 @@ void xpt2046_init(spi_host_device_t host, uint16_t pin_cs, uint16_t pen_irq)
     XPT2046_CS_PIN = pin_cs;
     XPT2046_IRQ = pen_irq;
     ESP_LOGI(TAG, "CS=%d，IRQ=%d", pin_cs, pen_irq);
+
     // xpt2040设备添加至总线
     spi_device_interface_config_t devcfg = {
         .clock_speed_hz = 1 * 1000 * 1000,
@@ -72,6 +73,7 @@ void xpt2046_init(spi_host_device_t host, uint16_t pin_cs, uint16_t pen_irq)
     ret = spi_bus_add_device(host, &devcfg, &tp2046_spi);
     ESP_LOGI(TAG, "spi_bus_add_device=%d", ret);
     assert(ret == ESP_OK);
+
 #if XPT2046_TOUCH_IRQ || XPT2046_TOUCH_IRQ_PRESS
     // 配置触摸屏
     gpio_config_t irq_config = {
