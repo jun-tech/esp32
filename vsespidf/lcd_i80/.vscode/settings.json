@@ -14,6 +14,7 @@
         "bsp_xpt2046.h": "c",
         "bsp_spi.h": "c",
         "sdkconfig.h": "c",
-        "lv_port_tick.h": "c"
+        "lv_port_tick.h": "c",
+        "lv_port_disp.h": "c"
     }
 }

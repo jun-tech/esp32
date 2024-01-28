@@ -1,0 +1,248 @@
+menu "Example config"
+
+    menu "TFT config"
+        choice LVGL_LCD_PANEL_SELECT
+            prompt "LCD panel"
+            default LVGL_LCD_PANEL_CL35BC1017_40A
+    
+            help
+                This selects the initialization register table for specific LCD panels.
+                You can select one from those tested models, or you may add your own panel
+                initialization register table inside components/bsp/bsp_lcd_panels.c.
+    
+            config LVGL_LCD_PANEL_W350CE024A_40Z
+                bool "W350CE024A-40Z (ST7796S, IPS)"
+    
+            config LVGL_LCD_PANEL_CL35BC1017_40A
+                bool "CL35BC1017-40A (ST7796S, TN)"
+    
+            config LVGL_LCD_PANEL_CL35BC106_40A
+                bool "CL35BC106-40A (ILI9488, TN)"
+        endchoice
+    
+        config LVGL_LCD_PCLK_FREQ
+            int "LCD pixel clock frequency in MHz"
+            default 13 if IDF_TARGET_ESP32
+            default 10  # C3 and others
+            range 2 15
+    
+            help
+                This selects the pixel frequency of the driver. Higher frequency improves fps
+                but may cause glitches in graphics or even prevent the screen from functioning.
+                How high the frequency could reach depends on the hardware (route on the pcb,
+                for example) and lcd driver chip specs. Choose as high frequency as possible
+                while the graphics is fine.
+    
+    endmenu
+
+    menu "TFT pins config"
+        config TFT_PIN_RS
+            int "RS GPIO number"
+            default 15 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_CS
+            int "CS GPIO number"
+            default 2 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_WR
+            int "WR GPIO number"
+            default 4 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_RST
+            int "RST GPIO number"
+            default 16 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_BL
+            int "BL GPIO number"
+            default 5 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_DB0
+            int "DB0 GPIO number"
+            default 32 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_DB1
+            int "DB1 GPIO number"
+            default 33 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_DB2
+            int "DB2 GPIO number"
+            default 25 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_DB3
+            int "DB3 GPIO number"
+            default 26 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_DB4
+            int "DB4 GPIO number"
+            default 27 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_DB5
+            int "DB5 GPIO number"
+            default 14 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_DB6
+            int "DB6 GPIO number"
+            default 12 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config TFT_PIN_DB7
+            int "DB7 GPIO number"
+            default 13 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        # config TFT_PIN_DB8
+        #     int "DB8 GPIO number"
+        #     default -1 if IDF_TARGET_ESP32
+        #     default 34 if IDF_TARGET_ESP32S2
+        #     default 34 if IDF_TARGET_ESP32S3
+        #     default 1  # C3 and others
+        # config TFT_PIN_DB9
+        #     int "DB9 GPIO number"
+        #     default -1 if IDF_TARGET_ESP32
+        #     default 34 if IDF_TARGET_ESP32S2
+        #     default 34 if IDF_TARGET_ESP32S3
+        #     default 1  # C3 and others
+        # config TFT_PIN_DB10
+        #     int "DB10 GPIO number"
+        #     default -1 if IDF_TARGET_ESP32
+        #     default 34 if IDF_TARGET_ESP32S2
+        #     default 34 if IDF_TARGET_ESP32S3
+        #     default 1  # C3 and others
+        # config TFT_PIN_DB11
+        #     int "DB11 GPIO number"
+        #     default 5 if IDF_TARGET_ESP32
+        #     default 34 if IDF_TARGET_ESP32S2
+        #     default 34 if IDF_TARGET_ESP32S3
+        #     default 1  # C3 and others
+        # config TFT_PIN_DB12
+        #     int "DB12 GPIO number"
+        #     default -1 if IDF_TARGET_ESP32
+        #     default 34 if IDF_TARGET_ESP32S2
+        #     default 34 if IDF_TARGET_ESP32S3
+        #     default 1  # C3 and others
+        # config TFT_PIN_DB13
+        #     int "DB13 GPIO number"
+        #     default -1 if IDF_TARGET_ESP32
+        #     default 34 if IDF_TARGET_ESP32S2
+        #     default 34 if IDF_TARGET_ESP32S3
+        #     default 1  # C3 and others
+        # config TFT_PIN_DB14
+        #     int "DB14 GPIO number"
+        #     default -1 if IDF_TARGET_ESP32
+        #     default 34 if IDF_TARGET_ESP32S2
+        #     default 34 if IDF_TARGET_ESP32S3
+        #     default 1  # C3 and others
+        # config TFT_PIN_DB15
+        #     int "DB15 GPIO number"
+        #     default -1 if IDF_TARGET_ESP32
+        #     default 34 if IDF_TARGET_ESP32S2
+        #     default 34 if IDF_TARGET_ESP32S3
+        #     default 1  # C3 and others
+    endmenu
+
+    menu "SPI bus"
+        config SPI_DMA_CHAN
+            int "SPI DMA CHAN"
+            default 1 if IDF_TARGET_ESP32
+            default 1 if IDF_TARGET_ESP32S2
+            default 1 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+            help
+                ESP32 DMA CHAN include 0，1
+        
+        choice SPI_HOST
+            prompt "SPI HOST"
+            default HOST_VSPI if IDF_TARGET_ESP32
+            default HOST_SPI if IDF_TARGET_ESP32S2
+            default HOST_SPI if IDF_TARGET_ESP32S3
+            default HOST_SPI  # C3 and others
+            help
+                ESP32 spi include spi、 hspi 、 vspi
+
+            config HOST_SPI
+                bool "SPI"
+            config HOST_HSPI
+                bool "HSP"
+            config HOST_VSPI
+                bool "VSPI"
+        endchoice
+    
+        config SPI_PIN_MOSI
+            int "MOSI GPIO number"
+            default 23 if IDF_TARGET_ESP32
+            default 35 if IDF_TARGET_ESP32S2
+            default 35 if IDF_TARGET_ESP32S3
+            default 4  # C3 and others
+    
+        config SPI_PIN_MISO
+            int "MISO GPIO number"
+            default 19 if IDF_TARGET_ESP32
+            default 37 if IDF_TARGET_ESP32S2
+            default 37 if IDF_TARGET_ESP32S3
+            default 6  # C3 and others
+    
+        config SPI_PIN_CLK
+            int "CLK GPIO number"
+            default 18 if IDF_TARGET_ESP32
+            default 36 if IDF_TARGET_ESP32S2
+            default 36 if IDF_TARGET_ESP32S3
+            default 5  # C3 and others
+    
+    endmenu
+
+    menu "XPT2046 config"
+        config XPT_PIN_CS
+            int "CS GPIO number"
+            default 22 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+        config XPT_PIN_IRQ
+            int "IRQ GPIO number (PEN)"
+            default 21 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+    endmenu
+
+    menu "SDCard config"
+    
+        config SDCARD_FORMAT_IF_MOUNT_FAILED
+            bool "Format the card if mount failed"
+            default n
+            help
+                Format the card if mount failed. default: n
+    
+        config SDCARD_PIN_CS
+            int "CS GPIO number"
+            default 5 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
+    
+    endmenu
+endmenu

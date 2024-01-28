@@ -18,29 +18,17 @@ static const char *TAG = "sdcard";
 
 #define MOUNT_POINT "/sdcard"
 
-// DMA 1被 lvgl 使用，改用2
-#define SPI_DMA_CHAN CONFIG_SDCARD_SPI_DMA_CHAN
-// SPI2 已经被lvgl占用换3
-#if CONFIG_SDCARD_SPI_HOST == 0
-#define SD_SPI_HOST SPI1_HOST
-#elif CONFIG_SDCARD_SPI_HOST == 1
-#define SD_SPI_HOST SPI2_HOST
-#elif CONFIG_SDCARD_SPI_HOST > 2
-#define SD_SPI_HOST SPI3_HOST
+/*-----------------变量声明-----------------------------------*/
+#if CONFIG_HOST_SPI
+#define BUS_SPI_HOST SPI1_HOST
+#elif CONFIG_HOST_HSPI
+#define BUS_SPI_HOST SPI2_HOST
+#elif CONFIG_HOST_VSPI
+#define BUS_SPI_HOST SPI3_HOST
 #else
-#define SD_SPI_HOST SPI2_HOST
+#define BUS_SPI_HOST SPI2_HOST
 #endif
-
-// 管脚定义
-// #define PIN_NUM_MISO 19
-// #define PIN_NUM_MOSI 23
-// #define PIN_NUM_CLK 18
-// #define PIN_NUM_CS 5
-
-#define PIN_NUM_MISO CONFIG_SDCARD_PIN_MISO
-#define PIN_NUM_MOSI CONFIG_SDCARD_PIN_MOSI
-#define PIN_NUM_CLK CONFIG_SDCARD_PIN_CLK
-#define PIN_NUM_CS CONFIG_SDCARD_PIN_CS
+/*-----------------------------------------------------------*/
 
 esp_err_t sdcard_init(void)
 {
@@ -67,24 +55,7 @@ esp_err_t sdcard_init(void)
     // host.max_freq_khz = 5000; // 降频
     host.max_freq_khz = 20000; // 20MHz
     // SPI2
-    host.slot = SD_SPI_HOST;
-
-    // 外部已经初始化，所以注释掉，共用HSPI
-    // spi_bus_config_t bus_cfg = {
-    //     .mosi_io_num = PIN_NUM_MOSI,
-    //     .miso_io_num = PIN_NUM_MISO,
-    //     .sclk_io_num = PIN_NUM_CLK,
-    //     .quadwp_io_num = -1,
-    //     .quadhd_io_num = -1,
-    //     .max_transfer_sz = 4000,
-    // };
-    // // SPI总线初始化
-    // ret = spi_bus_initialize(host.slot, &bus_cfg, SPI_DMA_CHAN);
-    // if (ret != ESP_OK)
-    // {
-    //     ESP_LOGE(TAG, "Failed to initialize bus.");
-    //     return ret;
-    // }
+    host.slot = BUS_SPI_HOST;
 
     // 这将初始化没有卡检测（CD）和写保护（WP）信号的插槽。
     // 如果您的主板有这些信号，请修改slot_config.gpio_cd和slot_config.gpio_wp。

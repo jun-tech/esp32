@@ -10,14 +10,14 @@
 #define LCD_X_PIXELS 320
 #define LCD_Y_PIXELS 480
 
-#define BSP_LCD_BL_PIN 15
-#define BSP_LCD_CS_PIN 4
-#define BSP_LCD_DC_PIN 2
-#define BSP_LCD_WR_PIN 16
-#define BSP_LCD_RST_PIN 17
-#define BSP_LCD_DATA_PINS             \
-    {                                 \
-        5, 18, 19, 21, 33, 32, 22, 23 \
+#define BSP_LCD_BL_PIN CONFIG_TFT_PIN_BL
+#define BSP_LCD_CS_PIN CONFIG_TFT_PIN_CS
+#define BSP_LCD_DC_PIN CONFIG_TFT_PIN_RS
+#define BSP_LCD_WR_PIN CONFIG_TFT_PIN_WR
+#define BSP_LCD_RST_PIN CONFIG_TFT_PIN_RST
+#define BSP_LCD_DATA_PINS                                                                                                                                              \
+    {                                                                                                                                                                  \
+        CONFIG_TFT_PIN_DB0, CONFIG_TFT_PIN_DB1, CONFIG_TFT_PIN_DB2, CONFIG_TFT_PIN_DB3, CONFIG_TFT_PIN_DB4, CONFIG_TFT_PIN_DB5, CONFIG_TFT_PIN_DB6, CONFIG_TFT_PIN_DB7 \
     }
 // 16位
 //  13, 12, 14, 27, 26, 25, 33, 32

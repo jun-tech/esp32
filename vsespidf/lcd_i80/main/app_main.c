@@ -16,6 +16,18 @@
 #include "lv_demos.h"
 
 /*-----------------变量声明-----------------------------------*/
+#if CONFIG_HOST_SPI
+#define BUS_SPI_HOST SPI1_HOST
+#elif CONFIG_HOST_HSPI
+#define BUS_SPI_HOST SPI2_HOST
+#elif CONFIG_HOST_VSPI
+#define BUS_SPI_HOST SPI3_HOST
+#else
+#define BUS_SPI_HOST SPI2_HOST
+#endif
+/*-----------------------------------------------------------*/
+
+/*-----------------变量声明-----------------------------------*/
 static const char *TAG = "main";
 static lv_obj_t *page1 = NULL;
 static lv_obj_t *page2 = NULL;
@@ -31,6 +43,25 @@ static void event_btn_handler(lv_event_t *e)
         if (page != NULL)
         {
             lv_scr_load(page);
+
+            // 模拟读一次
+            lv_fs_file_t f;
+            lv_fs_res_t res;
+            // res = lv_fs_open(&f, "S:folder/foo.txt", LV_FS_MODE_RD); // 这里的S:folder文件夹下的foo.txt
+            res = lv_fs_open(&f, "S:foo.txt", LV_FS_MODE_RD); // 读取根目录foo.txt
+            if (res != LV_FS_RES_OK)
+            {
+                ESP_LOGE("sdcard_file", "open fail");
+            }
+            else
+            {
+                ESP_LOGI("sdcard_file", "open ok");
+                uint32_t read_num;
+                char buf[20];
+                res = lv_fs_read(&f, buf, sizeof(buf), &read_num);
+                ESP_LOGI("main", "read:%s", buf);
+                lv_fs_close(&f);
+            }
         }
     }
     else if (code == LV_EVENT_VALUE_CHANGED)
@@ -113,23 +144,27 @@ void app_main(void)
     const TickType_t xPeriod = pdMS_TO_TICKS(10);
 
     // spi总线
-    bsp_spi_bus_init(HSPI_HOST, 26 /* miso */, 13 /* mosi */, 14 /*sck*/);
+    bsp_spi_bus_init(BUS_SPI_HOST, CONFIG_SPI_PIN_MISO /* miso */, CONFIG_SPI_PIN_MOSI /* mosi */, CONFIG_SPI_PIN_CLK /*sck*/);
 
+    // 先把电阻触摸、sdcard片选引脚拉高
     // 拉高
-    gpio_reset_pin(25);
-    gpio_set_direction(25, GPIO_MODE_OUTPUT);
-    gpio_set_level(25, 1);
+    gpio_reset_pin(CONFIG_XPT_PIN_CS);
+    gpio_set_direction(CONFIG_XPT_PIN_CS, GPIO_MODE_OUTPUT);
+    gpio_set_level(CONFIG_XPT_PIN_CS, 1);
     // 拉高
-    gpio_reset_pin(27);
-    gpio_set_direction(27, GPIO_MODE_OUTPUT);
-    gpio_set_level(27, 1);
+    gpio_reset_pin(CONFIG_SDCARD_PIN_CS);
+    gpio_set_direction(CONFIG_SDCARD_PIN_CS, GPIO_MODE_OUTPUT);
+    gpio_set_level(CONFIG_SDCARD_PIN_CS, 1);
+    // 电阻笔
+    gpio_reset_pin(CONFIG_XPT_PIN_IRQ);
+    gpio_set_direction(CONFIG_XPT_PIN_IRQ, GPIO_MODE_OUTPUT);
+    gpio_set_level(CONFIG_XPT_PIN_IRQ, 1);
 
     // lvgl 初始化
     lv_init();
     lv_port_disp_init();
     lv_fs_if_init(); // spi 总线在此初始化，sdcard 初始化
-    // vTaskDelay(pdMS_TO_TICKS(1000));
-    lv_port_touch_init(HSPI_HOST);
+    lv_port_touch_init(BUS_SPI_HOST);
     lv_create_tick();
 
     // 演示
@@ -138,11 +173,6 @@ void app_main(void)
     // lv_demo_benchmark();
     // lv_demo_stress();
     lvgl_read_sdcard_test();
-
-    // 触摸屏选中拉高
-    // gpio_reset_pin(25);
-    // gpio_set_direction(25, GPIO_MODE_OUTPUT);
-    // gpio_set_level(25, 0);
 
     while (1)
     {

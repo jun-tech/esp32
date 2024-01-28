@@ -17,29 +17,29 @@ https://zhuanlan.zhihu.com/p/630698425
 | 外设        | ESP32                                           | ESPC3 |
 | ----------- | ----------------------------------------------- | ----- |
 | **TFT屏幕** |                                                 |       |
-| RS/DC       | IO2                                             |       |
-| CS          | IO4                                             |       |
+| RS/DC       | IO15                                            |       |
+| CS          | IO2                                             |       |
 | RD          | 不接线也不影响                                  |       |
-| WR          | IO16                                            |       |
-| RST         | IO17                                            |       |
-| BL背光灯    | IO15，或3v3                                     |       |
-| DB0         | IO5                                             |       |
-| DB1         | IO18                                            |       |
-| DB2         | IO19                                            |       |
-| DB3         | IO21                                            |       |
-| DB4         | IO33                                            |       |
-| DB5         | IO32                                            |       |
-| DB6         | IO22                                            |       |
-| DB7         | IO23                                            |       |
+| WR          | IO4                                             |       |
+| RST         | IO16                                            |       |
+| BL背光灯    | IO5，或3v3                                      |       |
+| DB0         | IO32                                            |       |
+| DB1         | IO33                                            |       |
+| DB2         | IO25                                            |       |
+| DB3         | IO26                                            |       |
+| DB4         | IO27                                            |       |
+| DB5         | IO14                                            |       |
+| DB6         | IO12                                            |       |
+| DB7         | IO13                                            |       |
 | **电阻笔**  |                                                 |       |
-| TSDI        | **IO13（HSPI）MOSI**                            |       |
-| TSDO        | **IO26（HSPI）MISO**                            |       |
-| TPEN        | IO35                                            |       |
-| TCLK        | **IO14（HSPI）SCK**                             |       |
-| TCS         | IO25                                            |       |
-| **SDCARD**  | 共用HSPI，也叫SPI2                              |       |
-| CS          | IO27                                            |       |
-| MOSI        | **IO13（HSPI）**                                |       |
-| MISO        | **IO26（HSPI）** 原打算用GPIO12，发现跟boot冲突 |       |
-| SCK         | **IO14（HSPI）**                                |       |
+| TSDI        | **IO23（VSPI）MOSI**                            |       |
+| TSDO        | **IO19（VSPI）MISO**                            |       |
+| TPEN        | IO21                                            |       |
+| TCLK        | **IO18（VSPI）SCK**                             |       |
+| TCS         | IO22                                            |       |
+| **SDCARD**  | 共用VSPI，也叫SPI3                              |       |
+| CS          | IO5                                             |       |
+| MOSI        | **IO23（VSPI）**                                |       |
+| MISO        | **IO19（VSPI）** 原打算用GPIO12，发现跟boot冲突 |       |
+| SCK         | **IO18（VSPI）**                                |       |
 
