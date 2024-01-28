@@ -53,6 +53,7 @@ static void st7796s_send_color(void *data, uint16_t length);
 
 void st7796s_init(void)
 {
+	// driver 1
 	// lcd_init_cmd_t init_cmds[] = {
 	// 	{0xCF, {0x00, 0x83, 0X30}, 3},
 	// 	{0xED, {0x64, 0x03, 0X12, 0X81}, 4},
@@ -80,67 +81,89 @@ void st7796s_init(void)
 	// 	{0x29, {0}, 0x80},
 	// 	{0, {0}, 0xff},
 	// };
+
+	// driver 2 better
+	// lcd_init_cmd_t init_cmds[] = {
+	// 	{0x01, {0}, 0x80}, // Software reset
+	// 	{0x11, {0}, 0x80}, // Sleep exit
+	// 	{0xF0, {0xC3}, 1}, // Command Set control
+	// 					   // Enable extension command 2 partI
+	// 	{0xF0, {0x96}, 1}, // Command Set control
+	// 					   // Enable extension command 2 partII
+	// 	{0x36, {0x48}, 1}, // Memory Data Access Control MX, MY, RGB mode
+	// 					   // X-Mirror, Top-Left to right-Buttom, RGB
+	// 	{0x3A, {0x55}, 1}, // Interface Pixel Format
+	// 					   // Control interface color format set to 16
+	// 	{0xB4, {0x01}, 1}, // Column inversion
+	// 					   // 1-dot inversion
+	// 	{0xB6, {0x80, 0x02, 0x3B}, 3},
+	// 	// Display Function Control
+	// 	// Bypass
+	// 	// Source Output Scan from S1 to S960, Gate Output scan from G1 to G480, scan cycle=2
+	// 	// LCD Drive Line=8*(59+1)
+
+	// 	{0xE8, {0x40, 0x8A, 0x00, 0x00, 0x29, 0x19, 0xA5, 0x33}, 8},
+	// 	// Display Output Ctrl Adjust
+	// 	// Source eqaulizing period time= 22.5 us
+	// 	// Timing for "Gate start"=25 (Tclk)
+	// 	// Timing for "Gate End"=37 (Tclk), Gate driver EQ function ON
+
+	// 	{0xC1, {0x06}, 1},
+	// 	// Power control2
+	// 	// VAP(GVDD)=3.85+( vcom+vcom offset), VAN(GVCL)=-3.85+( vcom+vcom offset)
+
+	// 	{0xC2, {0xA7}, 1},
+	// 	// Power control 3
+	// 	//  Source driving current level=low, Gamma driving current level=High
+
+	// 	{0xC5, {0x18}, 1},
+	// 	// VCOM Control
+	// 	//  VCOM=0.9
+
+	// 	// delay(120);
+
+	// 	// ST7796 Gamma Sequence
+	// 	{0xE0, {0xF0, 0x09, 0x0b, 0x06, 0x04, 0x15, 0x2F, 0x54, 0x42, 0x3C, 0x17, 0x14, 0x18, 0x1B}, 14},
+	// 	// Gamma"+"
+
+	// 	{0xE1, {0xE0, 0x09, 0x0B, 0x06, 0x04, 0x03, 0x2B, 0x43, 0x42, 0x3B, 0x16, 0x14, 0x17, 0x1B}, 14},
+	// 	// Gamma"-"
+
+	// 	//   delay(120);
+	// 	{0xF0, {0x3C}, 1},
+	// 	// Command Set control
+	// 	// Disable extension command 2 partI
+
+	// 	{0xF0, {0x69}, 0x80},
+	// 	// Command Set control
+	// 	// Disable extension command 2 partII
+
+	// 	//   delay(120);
+
+	// 	{0x29, {0}, 0x80},
+	// 	// Display on
+	// 	{0, {0}, 0xff},
+
+	// };
+
+	// driver 3 best
 	lcd_init_cmd_t init_cmds[] = {
-		{0x01, {0}, 0x80}, // Software reset
-		{0x11, {0}, 0x80}, // Sleep exit
-		{0xF0, {0xC3}, 1}, // Command Set control
-						   // Enable extension command 2 partI
-		{0xF0, {0x96}, 1}, // Command Set control
-						   // Enable extension command 2 partII
-		{0x36, {0x48}, 1}, // Memory Data Access Control MX, MY, RGB mode
-						   // X-Mirror, Top-Left to right-Buttom, RGB
-		{0x3A, {0x55}, 1}, // Interface Pixel Format
-						   // Control interface color format set to 16
-		{0xB4, {0x01}, 1}, // Column inversion
-						   // 1-dot inversion
-		{0xB6, {0x80, 0x02, 0x3B}, 3},
-		// Display Function Control
-		// Bypass
-		// Source Output Scan from S1 to S960, Gate Output scan from G1 to G480, scan cycle=2
-		// LCD Drive Line=8*(59+1)
-
-		{0xE8, {0x40, 0x8A, 0x00, 0x00, 0x29, 0x19, 0xA5, 0x33}, 8},
-		// Display Output Ctrl Adjust
-		// Source eqaulizing period time= 22.5 us
-		// Timing for "Gate start"=25 (Tclk)
-		// Timing for "Gate End"=37 (Tclk), Gate driver EQ function ON
-
-		{0xC1, {0x06}, 1},
-		// Power control2
-		// VAP(GVDD)=3.85+( vcom+vcom offset), VAN(GVCL)=-3.85+( vcom+vcom offset)
-
-		{0xC2, {0xA7}, 1},
-		// Power control 3
-		//  Source driving current level=low, Gamma driving current level=High
-
-		{0xC5, {0x18}, 1},
-		// VCOM Control
-		//  VCOM=0.9
-
-		// delay(120);
-
-		// ST7796 Gamma Sequence
-		{0xE0, {0xF0, 0x09, 0x0b, 0x06, 0x04, 0x15, 0x2F, 0x54, 0x42, 0x3C, 0x17, 0x14, 0x18, 0x1B}, 14},
-		// Gamma"+"
-
-		{0xE1, {0xE0, 0x09, 0x0B, 0x06, 0x04, 0x03, 0x2B, 0x43, 0x42, 0x3B, 0x16, 0x14, 0x17, 0x1B}, 14},
-		// Gamma"-"
-
-		//   delay(120);
-		{0xF0, {0x3C}, 1},
-		// Command Set control
-		// Disable extension command 2 partI
-
-		{0xF0, {0x69}, 0x80},
-		// Command Set control
-		// Disable extension command 2 partII
-
-		//   delay(120);
-
+		{0x01, {0}, 0x80},																				  // Software reset
+		{0x11, {0}, 0x80},																				  // 退出休眠模式
+		{0x20, {0}, 0x80},																				  // 关闭反色显示
+		{0xF0, {0xC3}, 1},																				  // 使能指令集2第1部分
+		{0xF0, {0x96}, 1},																				  // 使能指令集2第2部分
+		{0x36, {0x48}, 1},																				  // 显存访问方式: MY=0, MX=1, MV=0, ML=0, RGB=1, MH=0
+		{0x3A, {0x55}, 1},																				  // 像素颜色格式: RGB模式16位, MCU模式16位
+		{0xC2, {0xA7}, 1},																				  // 源极&gamma驱动电流
+		{0xC5, {0x27}, 1},																				  // VCOM
+		{0xE0, {0xF0, 0x01, 0x06, 0x0F, 0x12, 0x1D, 0x36, 0x54, 0x44, 0x0C, 0x18, 0x16, 0x13, 0x15}, 14}, // 正gamma控制
+		{0xE1, {0xF0, 0x01, 0x05, 0x0A, 0x0B, 0x07, 0x32, 0x44, 0x44, 0x0C, 0x18, 0x17, 0x13, 0x16}, 14}, // 负gamma控制
+		{0xE8, {0x40, 0x82, 0x07, 0x18, 0x27, 0x0A, 0xB6, 0x33}, 8},									  // 显示参数配置
+		{0xF0, {0x3C}, 1},																				  // 失能指令集2第1部分
+		{0xF0, {0x69}, 1},																				  // 失能指令集2第2部分
 		{0x29, {0}, 0x80},
-		// Display on
-		{0, {0}, 0xff},
-
+		{0, {0}, 0xFF} // 寄存器列表结束
 	};
 
 	// Initialize non-SPI GPIOs

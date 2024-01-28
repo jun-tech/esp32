@@ -30,5 +30,5 @@
     "tp_spi.h": "c",
     "i2c_manager.h": "c"
   },
-  "idf.portWin": "COM6"
+  "idf.portWin": "COM4"
 }
