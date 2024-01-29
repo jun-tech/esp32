@@ -19,10 +19,10 @@ https://zhuanlan.zhihu.com/p/630698425
 | **TFT屏幕** |                                                 |       |
 | RS/DC       | IO15                                            |       |
 | CS          | IO2                                             |       |
-| RD          | 不接线也不影响                                  |       |
+| RD          | IO16不接线也不影响                              |       |
 | WR          | IO4                                             |       |
-| RST         | IO16                                            |       |
-| BL背光灯    | IO5，或3v3                                      |       |
+| RST         | IO17                                            |       |
+| BL背光灯    | IO3，或3v3                                      |       |
 | DB0         | IO32                                            |       |
 | DB1         | IO33                                            |       |
 | DB2         | IO25                                            |       |

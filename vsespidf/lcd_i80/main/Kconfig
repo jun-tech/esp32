@@ -48,6 +48,12 @@ menu "Example config"
             default 34 if IDF_TARGET_ESP32S2
             default 34 if IDF_TARGET_ESP32S3
             default 1  # C3 and others
+        config TFT_PIN_RD
+            int "RD GPIO number"
+            default 16 if IDF_TARGET_ESP32
+            default 34 if IDF_TARGET_ESP32S2
+            default 34 if IDF_TARGET_ESP32S3
+            default 1  # C3 and others
         config TFT_PIN_WR
             int "WR GPIO number"
             default 4 if IDF_TARGET_ESP32
@@ -56,13 +62,13 @@ menu "Example config"
             default 1  # C3 and others
         config TFT_PIN_RST
             int "RST GPIO number"
-            default 16 if IDF_TARGET_ESP32
+            default 17 if IDF_TARGET_ESP32
             default 34 if IDF_TARGET_ESP32S2
             default 34 if IDF_TARGET_ESP32S3
             default 1  # C3 and others
         config TFT_PIN_BL
             int "BL GPIO number"
-            default 5 if IDF_TARGET_ESP32
+            default 3 if IDF_TARGET_ESP32
             default 34 if IDF_TARGET_ESP32S2
             default 34 if IDF_TARGET_ESP32S3
             default 1  # C3 and others
