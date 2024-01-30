@@ -15,6 +15,7 @@
         "bsp_spi.h": "c",
         "sdkconfig.h": "c",
         "lv_port_tick.h": "c",
-        "lv_port_disp.h": "c"
+        "lv_port_disp.h": "c",
+        "lv_fs_if.h": "c"
     }
 }
