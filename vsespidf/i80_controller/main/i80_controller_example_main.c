@@ -30,28 +30,28 @@ static const char *TAG = "example";
 
 #define EXAMPLE_LCD_BK_LIGHT_ON_LEVEL 1
 #define EXAMPLE_LCD_BK_LIGHT_OFF_LEVEL !EXAMPLE_LCD_BK_LIGHT_ON_LEVEL
-#define EXAMPLE_PIN_NUM_DATA0 5
-#define EXAMPLE_PIN_NUM_DATA1 18
-#define EXAMPLE_PIN_NUM_DATA2 19
-#define EXAMPLE_PIN_NUM_DATA3 21
-#define EXAMPLE_PIN_NUM_DATA4 3
-#define EXAMPLE_PIN_NUM_DATA5 1
-#define EXAMPLE_PIN_NUM_DATA6 22
-#define EXAMPLE_PIN_NUM_DATA7 23
-#define EXAMPLE_PIN_NUM_DATA8 13
-#define EXAMPLE_PIN_NUM_DATA9 12
-#define EXAMPLE_PIN_NUM_DATA10 14
-#define EXAMPLE_PIN_NUM_DATA11 27
-#define EXAMPLE_PIN_NUM_DATA12 26
-#define EXAMPLE_PIN_NUM_DATA13 25
-#define EXAMPLE_PIN_NUM_DATA14 33
-#define EXAMPLE_PIN_NUM_DATA15 32
-#define EXAMPLE_PIN_NUM_PCLK 16 /* WR 引脚*/
+#define EXAMPLE_PIN_NUM_DATA0 32
+#define EXAMPLE_PIN_NUM_DATA1 33
+#define EXAMPLE_PIN_NUM_DATA2 25
+#define EXAMPLE_PIN_NUM_DATA3 26
+#define EXAMPLE_PIN_NUM_DATA4 27
+#define EXAMPLE_PIN_NUM_DATA5 14
+#define EXAMPLE_PIN_NUM_DATA6 12
+#define EXAMPLE_PIN_NUM_DATA7 13
+// #define EXAMPLE_PIN_NUM_DATA8 13
+// #define EXAMPLE_PIN_NUM_DATA9 12
+// #define EXAMPLE_PIN_NUM_DATA10 14
+// #define EXAMPLE_PIN_NUM_DATA11 27
+// #define EXAMPLE_PIN_NUM_DATA12 26
+// #define EXAMPLE_PIN_NUM_DATA13 25
+// #define EXAMPLE_PIN_NUM_DATA14 33
+// #define EXAMPLE_PIN_NUM_DATA15 32
+#define EXAMPLE_PIN_NUM_PCLK 4 /* WR 引脚*/
 // #define EXAMPLE_PIN_NUM_RD 4    /* RD 引脚*/
 #define EXAMPLE_PIN_NUM_CS 2
 #define EXAMPLE_PIN_NUM_DC 15 /* RS 引脚*/
 #define EXAMPLE_PIN_NUM_RST 17
-#define EXAMPLE_PIN_NUM_BK_LIGHT 4 /* 接3v3*/
+#define EXAMPLE_PIN_NUM_BK_LIGHT 3 /* 接3v3*/
 
 // The pixel number in horizontal and vertical
 #define EXAMPLE_LCD_H_RES 320
@@ -91,16 +91,17 @@ static void lv_tick_task(void *arg)
 }
 SemaphoreHandle_t xGuiSemaphore;
 
-static void gui_demo()
+static void gui_demo(lv_disp_t *disp)
 {
+    // example_lvgl_demo_ui(disp);
     // 开启sdcard
     // lvgl_bg_color_test();
     // lv_demo_widgets();
     // lv_demo_keypad_encoder();
-    lv_demo_music();
+    // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    // lv_demo_benchmark();
+    lv_demo_benchmark();
     // lv_demo_stress();
 }
 
@@ -243,8 +244,7 @@ static void gui_task(void *arg)
 
     esp_register_freertos_tick_hook((void *)lv_tick_task);
 
-    gui_demo();
-    // example_lvgl_demo_ui(disp);
+    gui_demo(disp);
 
     while (1)
     {

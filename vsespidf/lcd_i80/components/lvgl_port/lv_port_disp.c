@@ -5,6 +5,7 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "freertos/semphr.h"
 
 #include "lvgl.h"
 
@@ -14,20 +15,41 @@
 
 static const char *TAG = "lv_port_disp";
 
+/**
+ * @brief 总线传输完成后，回调此函数
+ *
+ * @param panel_io
+ * @param edata
+ * @param user_ctx
+ * @return true
+ * @return false
+ */
+static bool notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
+{
+    // 感觉总线传输完调刷新，不是很平滑
+    /* 通知lvgl传输已完成 */
+    // lv_disp_drv_t *disp_driver = (lv_disp_drv_t *)user_ctx;
+    // lv_disp_flush_ready(disp_driver);
+    // return false;
+    return true;
+}
+
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
     /* 启动新的传输 */
     lcd_draw_rect(disp_drv->user_data, area->x1, area->y1, area->x2, area->y2, color_p);
-    /* 通知lvgl传输已完成 */
     lv_disp_flush_ready(disp_drv);
 }
 
 void lv_port_disp_init()
 {
+    /* 创建并初始化用于在lvgl中注册显示设备的结构 */
+    static lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv); // 使用默认值初始化该结构
 
     /* 初始化LCD总线 */
-    static esp_lcd_panel_io_handle_t panel_io;                                                      // 需要全程生命周期，设置为静态变量
-    panel_io = lcd_i80_bus_io_init(CONFIG_LVGL_LCD_PCLK_FREQ, LVGL_BUFF_SIZE * sizeof(lv_color_t)); // 初始化8080并行总线
+    static esp_lcd_panel_io_handle_t panel_io;                                                                                                  // 需要全程生命周期，设置为静态变量
+    panel_io = lcd_i80_bus_io_init(CONFIG_LVGL_LCD_PCLK_FREQ, LVGL_BUFF_SIZE * sizeof(lv_color_t), notify_lvgl_flush_ready, (void *)&disp_drv); // 初始化8080并行总线
 
 /* 初始化寄存器 */
 #if defined(CONFIG_LVGL_LCD_PANEL_W350CE024A_40Z)
@@ -48,9 +70,6 @@ void lv_port_disp_init()
     static lv_disp_draw_buf_t draw_buf_dsc; // 需要全程生命周期，设置为静态变量
     lv_disp_draw_buf_init(&draw_buf_dsc, lvgl_draw_buff1, lvgl_draw_buff2, LVGL_BUFF_SIZE);
 
-    /* 创建并初始化用于在lvgl中注册显示设备的结构 */
-    static lv_disp_drv_t disp_drv;
-    lv_disp_drv_init(&disp_drv); // 使用默认值初始化该结构
     /* 设置屏幕分辨率 */
     disp_drv.hor_res = LCD_X_PIXELS;
     disp_drv.ver_res = LCD_Y_PIXELS;

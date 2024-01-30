@@ -21,7 +21,8 @@ static esp_err_t lcd_bl_init();
  * @param trans_done_cb 传输完毕后的回调函数，NULL为不使用
  * @return esp_lcd_panel_io_handle_t 显示接口句柄
  */
-esp_lcd_panel_io_handle_t lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer_size)
+esp_lcd_panel_io_handle_t lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer_size,
+                                              esp_lcd_panel_io_color_trans_done_cb_t trans_done_cb, void *user_data)
 {
     /* 初始化背光 */
     lcd_bl_init();
@@ -34,6 +35,8 @@ esp_lcd_panel_io_handle_t lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer
         .data_gpio_nums = BSP_LCD_DATA_PINS,
         .bus_width = 8,                      // 总线宽度16位
         .max_transfer_bytes = transfer_size, // 缓冲区大小
+        // .psram_trans_align = 64,
+        // .sram_trans_align = 4,
     };
     esp_lcd_new_i80_bus(&bus_config, &i80_bus);
     assert(i80_bus != NULL);
@@ -52,7 +55,8 @@ esp_lcd_panel_io_handle_t lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer
         },
         .lcd_cmd_bits = 8,
         .lcd_param_bits = 8, // 指令与指令参数的长度
-    };
+        .on_color_trans_done = trans_done_cb,
+        .user_ctx = user_data};
     esp_lcd_new_panel_io_i80(i80_bus, &io_config, &io_handle);
     assert(io_handle != NULL);
 

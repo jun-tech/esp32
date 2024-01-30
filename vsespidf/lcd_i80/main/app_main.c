@@ -56,10 +56,10 @@ static void gui_demo()
     // lvgl_test();
     // lv_demo_widgets();
     // lv_demo_keypad_encoder();
-    lv_demo_music();
+    // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    // lv_demo_benchmark();
+    lv_demo_benchmark();
     // lv_demo_stress();
 }
 

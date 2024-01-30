@@ -23,7 +23,7 @@
 //  13, 12, 14, 27, 26, 25, 33, 32
 
 esp_lcd_panel_io_handle_t
-lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer_size);
+lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer_size, esp_lcd_panel_io_color_trans_done_cb_t trans_done_cb, void *user_data);
 void lcd_init_reg(const esp_lcd_panel_io_handle_t io, const lcd_panel_reg_t reg_table[]);
 void lcd_draw_rect(const esp_lcd_panel_io_handle_t io, uint16_t x_start, uint16_t y_start, uint16_t x_end, uint16_t y_end, const void *color_data);
 void lcd_disp_switch(const esp_lcd_panel_io_handle_t io, bool sw);
