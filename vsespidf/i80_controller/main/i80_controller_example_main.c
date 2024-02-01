@@ -17,6 +17,7 @@
 #include "driver/gpio.h"
 #include "esp_err.h"
 #include "esp_log.h"
+#include "esp_task_wdt.h"
 #include "lvgl.h"
 #include "lv_demos.h"
 
@@ -63,6 +64,8 @@ static const char *TAG = "example";
 // Supported alignment: 16, 32, 64. A higher alignment can enables higher burst transfer size, thus a higher i80 bus throughput.
 #define EXAMPLE_PSRAM_DATA_ALIGNMENT 64
 
+#define LVGL_TASK_HANDLER_PRIORITY (tskIDLE_PRIORITY + 3)
+
 extern void example_lvgl_demo_ui(lv_disp_t *disp);
 
 static bool example_notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
@@ -98,10 +101,10 @@ static void gui_demo(lv_disp_t *disp)
     // lvgl_bg_color_test();
     // lv_demo_widgets();
     // lv_demo_keypad_encoder();
-    // lv_demo_music();
+    lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    lv_demo_benchmark();
+    // lv_demo_benchmark();
     // lv_demo_stress();
 }
 
@@ -264,5 +267,6 @@ static void gui_task(void *arg)
 
 void app_main(void)
 {
-    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 6, NULL, 1, NULL, 0);
+    // xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 6, NULL, LVGL_TASK_HANDLER_PRIORITY, NULL, 0);
+    xTaskCreate(gui_task, "gui task", 1024 * 6, NULL, LVGL_TASK_HANDLER_PRIORITY, NULL);
 }

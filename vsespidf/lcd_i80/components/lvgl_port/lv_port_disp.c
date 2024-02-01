@@ -26,11 +26,9 @@ static const char *TAG = "lv_port_disp";
  */
 static bool notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
 {
-    // 感觉总线传输完调刷新，不是很平滑
     /* 通知lvgl传输已完成 */
-    // lv_disp_drv_t *disp_driver = (lv_disp_drv_t *)user_ctx;
-    // lv_disp_flush_ready(disp_driver);
-    // return false;
+    lv_disp_drv_t *disp_driver = (lv_disp_drv_t *)user_ctx;
+    lv_disp_flush_ready(disp_driver);
     return true;
 }
 
@@ -38,7 +36,6 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
 {
     /* 启动新的传输 */
     lcd_draw_rect(disp_drv->user_data, area->x1, area->y1, area->x2, area->y2, color_p);
-    lv_disp_flush_ready(disp_drv);
 }
 
 void lv_port_disp_init()
@@ -66,6 +63,7 @@ void lv_port_disp_init()
     /* 申请lvgl渲染缓冲区 */
     lv_color_t *lvgl_draw_buff1 = heap_caps_malloc(LVGL_BUFF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
     lv_color_t *lvgl_draw_buff2 = heap_caps_malloc(LVGL_BUFF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
+
     /* 向lvgl注册缓冲区 */
     static lv_disp_draw_buf_t draw_buf_dsc; // 需要全程生命周期，设置为静态变量
     lv_disp_draw_buf_init(&draw_buf_dsc, lvgl_draw_buff1, lvgl_draw_buff2, LVGL_BUFF_SIZE);
@@ -81,7 +79,8 @@ void lv_port_disp_init()
     disp_drv.draw_buf = &draw_buf_dsc;
     /* 注册显示设备 */
     lv_disp_drv_register(&disp_drv);
-
+    /*旋转角度*/
+    lcd_set_direction(panel_io, DIRECTION0);
     /* 开启显示 */
     lcd_disp_switch(panel_io, true);
 }

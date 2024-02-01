@@ -59,7 +59,6 @@ esp_lcd_panel_io_handle_t lcd_i80_bus_io_init(uint16_t pclk_mhz, size_t transfer
         .user_ctx = user_data};
     esp_lcd_new_panel_io_i80(i80_bus, &io_config, &io_handle);
     assert(io_handle != NULL);
-
     return io_handle;
 }
 
@@ -172,4 +171,36 @@ esp_err_t lcd_bl_set(uint8_t brightness)
 
     /* 更新PWM占空比输出 */
     return ledc_update_duty(lcd_bl_ledc_channel.speed_mode, lcd_bl_ledc_channel.channel);
+}
+
+void lcd_set_direction(const esp_lcd_panel_io_handle_t io, DIRECTION direct)
+{
+    uint8_t xycmd[2];
+    if (direct == DIRECTION0 || direct == DIRECTION180) // 竖屏
+    {
+        if (direct == DIRECTION0) // 0-0度旋转
+        {
+            xycmd[1] = 0x40;
+        }
+        else // 1-180度旋转
+        {
+            xycmd[1] = 0x80;
+        }
+    }
+    else if (direct == DIRECTION90 || direct == DIRECTION270) // 横屏
+    {
+        if (direct == DIRECTION270) // 2-270度旋转
+        {
+            xycmd[1] = 0x80 | 0x40 | 0x20;
+        }
+        else // 3-90度旋转
+        {
+            xycmd[1] = 0x20;
+        }
+    }
+    uint8_t ST7796_MAD_BGR = 0x08;
+    xycmd[0] = 0x36;
+    xycmd[1] = xycmd[1] | ST7796_MAD_BGR;
+
+    esp_lcd_panel_io_tx_param(io, xycmd[0], (uint8_t[]){xycmd[1]}, 1);
 }

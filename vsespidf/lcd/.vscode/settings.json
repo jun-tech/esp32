@@ -23,7 +23,10 @@
     "tft_drivers.h": "c",
     "freertos.h": "c",
     "spi_master.h": "c",
-    "task.h": "c"
+    "task.h": "c",
+    "gpio.h": "c",
+    "stdio.h": "c",
+    "esp_log.h": "c"
   },
   "idf.portWin": "COM4"
 }

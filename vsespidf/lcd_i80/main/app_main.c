@@ -28,15 +28,35 @@
 #else
 #define BUS_SPI_HOST SPI2_HOST
 #endif
+
+static const char *TAG = "main";
+static size_t i = 0;
+lv_timer_t *lv_tm;
 /*-----------------------------------------------------------*/
 
+/*-----------------LVGL变量声明-----------------------------------*/
+static SemaphoreHandle_t xGuiSemaphore;
+TaskHandle_t xTask;
 /*-----------------变量声明-----------------------------------*/
-static const char *TAG = "main";
-/*-----------------------------------------------------------*/
+
+static void lv_tm_cb(lv_timer_t *tmr);
 
 void lvgl_read_sdcard_test(void)
 {
-    create_page(0);
+    lv_tm = lv_timer_create(lv_tm_cb, 600, 0);
+    create_page(i++);
+}
+
+// 定时器，界面不断
+static void lv_tm_cb(lv_timer_t *tmr)
+{
+    ESP_LOGI(TAG, "page %d", i);
+    create_page(i++);
+    // 测试翻页100次
+    if (i > 1000)
+    {
+        lv_timer_del(lv_tm);
+    }
 }
 
 /* LVGL 移植部分 */
@@ -45,7 +65,6 @@ void lvgl_read_sdcard_test(void)
 //     (void)arg;
 //     lv_tick_inc(portTICK_PERIOD_MS);
 // }
-SemaphoreHandle_t xGuiSemaphore;
 
 static void gui_demo()
 {
@@ -60,11 +79,36 @@ static void gui_demo()
     // lv_demo_printer();
     // 以下2案例性能测试
     lv_demo_benchmark();
+
     // lv_demo_stress();
 }
 
 /* UI 任务 */
 static void gui_task(void *arg)
+{
+    while (1)
+    {
+
+        /* Try to take the semaphore, call lvgl related function on success */
+        if (pdTRUE == xSemaphoreTake(xGuiSemaphore, portMAX_DELAY))
+        {
+            lv_timer_handler();
+            xSemaphoreGive(xGuiSemaphore);
+        }
+
+        // 算出需要多少空间
+        // UBaseType_t stackLeft = uxTaskGetStackHighWaterMark(xTask);
+        // ESP_LOGI("task1", "stackLeft : %d", stackLeft);
+        /* Delay 1 tick (assumes FreeRTOS tick is 10ms */
+        // 这里让下idle task
+        vTaskDelay(pdMS_TO_TICKS(20));
+    }
+
+    vTaskDelete(NULL);
+}
+
+// 主函数
+void app_main(void)
 {
     xGuiSemaphore = xSemaphoreCreateMutex();
 
@@ -92,33 +136,9 @@ static void gui_task(void *arg)
     lv_fs_if_init(); // sdcard 初始化
     lv_port_touch_init(BUS_SPI_HOST);
     lv_create_tick();
-    // 初始化========================================================
-
     // esp_register_freertos_tick_hook((void *)lv_tick_task);
-
     gui_demo();
-#if 0
-    lv_tm = lv_timer_create(lv_tm_cb, 3000, 0);
-#endif
 
-    while (1)
-    {
-        /* Delay 1 tick (assumes FreeRTOS tick is 10ms */
-        vTaskDelay(pdMS_TO_TICKS(10));
-
-        /* Try to take the semaphore, call lvgl related function on success */
-        if (pdTRUE == xSemaphoreTake(xGuiSemaphore, portMAX_DELAY))
-        {
-            lv_timer_handler();
-            xSemaphoreGive(xGuiSemaphore);
-        }
-    }
-
-    vTaskDelete(NULL);
-}
-
-// 主函数
-void app_main(void)
-{
-    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 4, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 4, NULL, 1, &xTask, 0);
+    // xTaskCreate(gui_task, "gui task", 1024 * 4, NULL, 1, NULL);
 }
