@@ -16,6 +16,7 @@
         "sdkconfig.h": "c",
         "lv_port_tick.h": "c",
         "lv_port_disp.h": "c",
-        "lv_fs_if.h": "c"
+        "lv_fs_if.h": "c",
+        "ws2812b_led_strip.h": "c"
     }
 }

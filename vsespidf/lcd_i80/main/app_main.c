@@ -17,6 +17,7 @@
 
 #include "lv_demos.h"
 #include "ui_page.h"
+#include "ws2812b_led_strip.h"
 
 /*-----------------变量声明-----------------------------------*/
 #if CONFIG_HOST_SPI
@@ -70,7 +71,7 @@ static void gui_demo()
 {
     // 开启sdcard
     // lvgl_read_sdcard_dir_test();
-    // lvgl_read_sdcard_test();
+    lvgl_read_sdcard_test();
     // lvgl_bg_color_test();
     // lvgl_test();
     // lv_demo_widgets();
@@ -78,7 +79,7 @@ static void gui_demo()
     // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    lv_demo_benchmark();
+    // lv_demo_benchmark();
 
     // lv_demo_stress();
 }
@@ -104,6 +105,13 @@ static void gui_task(void *arg)
         vTaskDelay(pdMS_TO_TICKS(20));
     }
 
+    vTaskDelete(NULL);
+}
+
+// ws2812b
+void led_task()
+{
+    led_main();
     vTaskDelete(NULL);
 }
 
@@ -140,5 +148,6 @@ void app_main(void)
     gui_demo();
 
     xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 4, NULL, 1, &xTask, 0);
+    xTaskCreatePinnedToCore(led_task, "led task", 1024 * 4, NULL, 1, &xTask, 0);
     // xTaskCreate(gui_task, "gui task", 1024 * 4, NULL, 1, NULL);
 }
