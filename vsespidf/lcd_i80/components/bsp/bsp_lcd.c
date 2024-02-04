@@ -175,7 +175,7 @@ esp_err_t lcd_bl_set(uint8_t brightness)
 
 void lcd_set_direction(const esp_lcd_panel_io_handle_t io, DIRECTION direct)
 {
-    uint8_t xycmd[2];
+    uint8_t xycmd[2] = {0};
     if (direct == DIRECTION0 || direct == DIRECTION180) // 竖屏
     {
         if (direct == DIRECTION0) // 0-0度旋转

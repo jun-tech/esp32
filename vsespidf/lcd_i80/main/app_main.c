@@ -71,7 +71,7 @@ static void gui_demo()
 {
     // 开启sdcard
     // lvgl_read_sdcard_dir_test();
-    lvgl_read_sdcard_test();
+    // lvgl_read_sdcard_test();
     // lvgl_bg_color_test();
     // lvgl_test();
     // lv_demo_widgets();
@@ -80,8 +80,7 @@ static void gui_demo()
     // lv_demo_printer();
     // 以下2案例性能测试
     // lv_demo_benchmark();
-
-    // lv_demo_stress();
+    lv_demo_stress();
 }
 
 /* UI 任务 */
@@ -111,7 +110,8 @@ static void gui_task(void *arg)
 // ws2812b
 void led_task()
 {
-    led_main();
+    // led_strip_rainbrow();
+    led_strip_breathing();
     vTaskDelete(NULL);
 }
 
@@ -126,17 +126,21 @@ void app_main(void)
 
     // 先把电阻触摸、sdcard片选引脚拉高
     // 拉高
-    gpio_reset_pin(CONFIG_XPT_PIN_CS);
+    gpio_pad_select_gpio(CONFIG_XPT_PIN_CS);
     gpio_set_direction(CONFIG_XPT_PIN_CS, GPIO_MODE_OUTPUT);
     gpio_set_level(CONFIG_XPT_PIN_CS, 1);
     // 拉高
-    gpio_reset_pin(CONFIG_SDCARD_PIN_CS);
+    gpio_pad_select_gpio(CONFIG_SDCARD_PIN_CS);
     gpio_set_direction(CONFIG_SDCARD_PIN_CS, GPIO_MODE_OUTPUT);
     gpio_set_level(CONFIG_SDCARD_PIN_CS, 1);
     // 电阻笔
-    gpio_reset_pin(CONFIG_XPT_PIN_IRQ);
+    gpio_pad_select_gpio(CONFIG_XPT_PIN_IRQ);
     gpio_set_direction(CONFIG_XPT_PIN_IRQ, GPIO_MODE_OUTPUT);
     gpio_set_level(CONFIG_XPT_PIN_IRQ, 1);
+    // 彩灯
+    gpio_pad_select_gpio(1);
+    gpio_set_direction(1, GPIO_MODE_OUTPUT);
+    gpio_set_level(1, 0);
 
     // lvgl 初始化
     lv_init();
