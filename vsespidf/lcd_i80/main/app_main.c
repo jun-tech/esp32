@@ -18,6 +18,7 @@
 #include "lv_demos.h"
 #include "ui_page.h"
 #include "ws2812b_led_strip.h"
+#include "ui.h"
 
 /*-----------------变量声明-----------------------------------*/
 #if CONFIG_HOST_SPI
@@ -80,7 +81,9 @@ static void gui_demo()
     // lv_demo_printer();
     // 以下2案例性能测试
     // lv_demo_benchmark();
-    lv_demo_stress();
+    // lv_demo_stress();
+    //
+    ui_init();
 }
 
 /* UI 任务 */
