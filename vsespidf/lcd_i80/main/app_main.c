@@ -61,13 +61,6 @@ static void lv_tm_cb(lv_timer_t *tmr)
     }
 }
 
-/* LVGL 移植部分 */
-// static void lv_tick_task(void *arg)
-// {
-//     (void)arg;
-//     lv_tick_inc(portTICK_PERIOD_MS);
-// }
-
 static void gui_demo()
 {
     // 开启sdcard
@@ -80,10 +73,10 @@ static void gui_demo()
     // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    // lv_demo_benchmark();
+    lv_demo_benchmark();
     // lv_demo_stress();
-    //
-    ui_init();
+    // squareline界面
+    // ui_init();
 }
 
 /* UI 任务 */
@@ -151,10 +144,8 @@ void app_main(void)
     lv_fs_if_init(); // sdcard 初始化
     lv_port_touch_init(BUS_SPI_HOST);
     lv_create_tick();
-    // esp_register_freertos_tick_hook((void *)lv_tick_task);
     gui_demo();
 
     xTaskCreatePinnedToCore(gui_task, "gui task", 1024 * 4, NULL, 1, &xTask, 0);
     xTaskCreatePinnedToCore(led_task, "led task", 1024 * 4, NULL, 1, &xTask, 0);
-    // xTaskCreate(gui_task, "gui task", 1024 * 4, NULL, 1, NULL);
 }

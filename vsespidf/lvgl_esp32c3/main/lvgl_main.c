@@ -10,6 +10,7 @@
 #include "lvgl_helpers.h"
 
 #include "lv_demos.h"
+#include "ui.h"
 
 /*-----------------函数声明-----------------------------------*/
 void lvgl_test(void);
@@ -33,8 +34,9 @@ static void gui_demo()
     // lv_demo_music();
     // lv_demo_printer();
     // 以下2案例性能测试
-    lv_demo_benchmark();
+    // lv_demo_benchmark();
     // lv_demo_stress();
+    ui_init();
 }
 
 /* UI 任务 */

@@ -4,7 +4,7 @@ ESP32C3合宙版，搭建详情基于本级目录lvgl，其他差别参考此文
 
 
 
-# 接线配置
+# ST7796 SPI - 接线配置
 
 |     TFT     | ESP32-C2/C3 |
 | :---------: | :---------: |
@@ -24,4 +24,18 @@ ESP32C3合宙版，搭建详情基于本级目录lvgl，其他差别参考此文
 |    T_IRQ    |    GPIO8    |
 
 Swap XY.选项去掉打勾	Invert X coordinate value.选项去掉打勾	Invert Y coordinate value.选项打勾
+
+
+
+# ST7789 SPI - 接线配置
+
+| TFT  | ESP32-C2/C3 |
+| :--: | :---------: |
+| VCC  |     3V3     |
+| GND  |     GND     |
+| SCK  |    GPIO2    |
+| SDA  |    GPIO3    |
+| RES  |   GPIO10    |
+|  DC  |    GPIO6    |
+| BLK  |    GPIO7    |
 
