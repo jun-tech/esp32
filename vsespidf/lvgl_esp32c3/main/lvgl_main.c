@@ -11,6 +11,7 @@
 
 #include "lv_demos.h"
 #include "ui.h"
+#include "my_clock.h"
 
 /*-----------------函数声明-----------------------------------*/
 void lvgl_test(void);
@@ -36,7 +37,8 @@ static void gui_demo()
     // 以下2案例性能测试
     // lv_demo_benchmark();
     // lv_demo_stress();
-    ui_init();
+    // ui_init();
+    my_clock_init();
 }
 
 /* UI 任务 */
