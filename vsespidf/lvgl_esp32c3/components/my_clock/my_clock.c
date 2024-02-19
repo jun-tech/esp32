@@ -30,10 +30,10 @@ static void send_event(void)
 void my_clock_init(void)
 {
     // 1、绘制背景
-    LV_IMG_DECLARE(bg2_240_240);
+    LV_IMG_DECLARE(bg_240_240);
     lv_obj_t *screen = lv_scr_act();
     lv_obj_t *bg_img = lv_img_create(screen);
-    lv_img_set_src(bg_img, &bg2_240_240);
+    lv_img_set_src(bg_img, &bg_240_240);
     lv_obj_align(bg_img, LV_ALIGN_CENTER, 0, 0);
     lv_obj_set_size(bg_img, 240, 240);
 
