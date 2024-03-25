@@ -4,5 +4,6 @@
     "lvgl_sdcard.h": "c"
   },
   "idf.portWin": "COM4",
-  "idf.flashType": "UART"
+  "idf.flashType": "UART",
+  "idf.adapterTargetName": "esp32"
 }
