@@ -20,5 +20,6 @@
     "opencv_process.h": "c",
     "core.hpp": "c",
     "esp_log.h": "c"
-  }
+  },
+  "idf.portWin": "COM20"
 }

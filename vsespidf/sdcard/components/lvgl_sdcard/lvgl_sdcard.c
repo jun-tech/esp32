@@ -31,16 +31,16 @@ static const char *TAG = "sdcard";
 #define SD_SPI_HOST SPI2_HOST
 #endif
 
-// 管脚定义
-// #define PIN_NUM_MISO 19
-// #define PIN_NUM_MOSI 23
-// #define PIN_NUM_CLK 18
-// #define PIN_NUM_CS 5
+// ESP32 扩展板 管脚定义
+#define PIN_NUM_MISO 19
+#define PIN_NUM_MOSI 23
+#define PIN_NUM_CLK 18
+#define PIN_NUM_CS 5
 
-#define PIN_NUM_MISO CONFIG_SDCARD_PIN_MISO
-#define PIN_NUM_MOSI CONFIG_SDCARD_PIN_MOSI
-#define PIN_NUM_CLK CONFIG_SDCARD_PIN_CLK
-#define PIN_NUM_CS CONFIG_SDCARD_PIN_CS
+// #define PIN_NUM_MISO CONFIG_SDCARD_PIN_MISO
+// #define PIN_NUM_MOSI CONFIG_SDCARD_PIN_MOSI
+// #define PIN_NUM_CLK CONFIG_SDCARD_PIN_CLK
+// #define PIN_NUM_CS CONFIG_SDCARD_PIN_CS
 
 esp_err_t sdcard_init(void)
 {
@@ -48,9 +48,9 @@ esp_err_t sdcard_init(void)
     // Options for mounting the filesystem.
     // If format_if_mount_failed is set to true, SD card will be partitioned and
     // formatted in case when mounting fails.
-    esp_vfs_fat_sdmmc_mount_config_t mount_config = {                                 // 文件系统挂载配置
-                                                     .format_if_mount_failed = false, // 如果挂载失败：true会重新分区和格式化/false不会重新分区和格式化
-                                                     .max_files = 5,                  // 打开文件最大数量
+    esp_vfs_fat_sdmmc_mount_config_t mount_config = {                                // 文件系统挂载配置
+                                                     .format_if_mount_failed = true, // 如果挂载失败：true会重新分区和格式化/false不会重新分区和格式化
+                                                     .max_files = 5,                 // 打开文件最大数量
                                                      .allocation_unit_size = 16 * 1024};
     sdmmc_card_t *card;                     // SD / MMC卡信息结构
     const char mount_point[] = MOUNT_POINT; // 根目录
@@ -70,10 +70,10 @@ esp_err_t sdcard_init(void)
     host.slot = SD_SPI_HOST;
 
     // spi 4线上拉
-    // gpio_set_pull_mode(PIN_NUM_MOSI, GPIO_PULLUP_ONLY);
-    // gpio_set_pull_mode(PIN_NUM_MISO, GPIO_PULLUP_ONLY);
-    // gpio_set_pull_mode(PIN_NUM_CLK, GPIO_PULLUP_ONLY);
-    // gpio_set_pull_mode(CONFIG_SDCARD_PIN_CS, GPIO_PULLUP_ONLY);
+    gpio_set_pull_mode(PIN_NUM_MOSI, GPIO_PULLUP_ONLY);
+    gpio_set_pull_mode(PIN_NUM_MISO, GPIO_PULLUP_ONLY);
+    gpio_set_pull_mode(PIN_NUM_CLK, GPIO_PULLUP_ONLY);
+    gpio_set_pull_mode(PIN_NUM_CS, GPIO_PULLUP_ONLY);
 
     // 外部已经初始化，所以注释掉，共用HSPI
     spi_bus_config_t bus_cfg = {
@@ -95,7 +95,7 @@ esp_err_t sdcard_init(void)
     // 这将初始化没有卡检测（CD）和写保护（WP）信号的插槽。
     // 如果您的主板有这些信号，请修改slot_config.gpio_cd和slot_config.gpio_wp。
     sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
-    slot_config.gpio_cs = CONFIG_SDCARD_PIN_CS;
+    slot_config.gpio_cs = PIN_NUM_CS;
     slot_config.host_id = host.slot;
 
     // 挂载文件系统
