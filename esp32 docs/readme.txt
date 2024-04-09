@@ -30,8 +30,8 @@ GPIO 32	SPID
 管脚	功能
 GPIO 0	芯片启动模式
 GPIO 3	JTAG 信号源
-GPIO 19	UART 接口 – 通常用于调试功能。
-GPIO 20	UART 接口 – 通常用于调试功能。
+GPIO 19	UART 接口 – 通常用于JTAG调试。
+GPIO 20	UART 接口 – 通常用于JTAG调试。
 GPIO 45	VDD_SPI 电压
 GPIO 46	芯片启动模式/ROM 代码日志打印
 GPIO 35   开启PSRAM时不能占用

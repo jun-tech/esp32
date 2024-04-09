@@ -32,10 +32,10 @@ static const char *TAG = "example";
 // #define PIN_NUM_CS 5
 
 // esp32s3
-#define PIN_NUM_MISO 7
-#define PIN_NUM_MOSI 6
-#define PIN_NUM_CLK 5
-#define PIN_NUM_CS 4
+#define PIN_NUM_MISO 2
+#define PIN_NUM_MOSI 1
+#define PIN_NUM_CLK 42
+#define PIN_NUM_CS 39
 
 void app_main(void)
 {
