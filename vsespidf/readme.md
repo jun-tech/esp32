@@ -47,3 +47,38 @@ https://zhuanlan.zhihu.com/p/630698425
 | MISO        | **IO19（VSPI）** 原打算用GPIO12，发现跟boot冲突 | **IO2（VSPI）MISO**                                          |
 | SCK         | **IO18（VSPI）**                                | **IO42（VSPI）SCK**                                          |
 
+
+
+# sdcard写数据时错误，修改组件库参数改成1000
+
+sdmmc_cmd: sdmmc_read_sectors_dma: sdmmc_send_cmd returned 0x107
+
+esp-idf\components\fatfs\diskio\diskio_sdmmc.c
+
+```c
+// 改造成多试几次
+DRESULT ff_sdmmc_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count)
+{
+    sdmmc_card_t *card = s_cards[pdrv];
+    assert(card);
+    for (int retry_count = 0; retry_count < 5; retry_count++)
+    {
+        // int32_t start_time = esp_timer_get_time();
+        esp_err_t err = sdmmc_read_sectors(card, buff, sector, count);
+
+        if (err != ESP_OK)
+        {
+            printf("[READ]Failed at sector %d, retry_count %d \n", sector, retry_count);
+            continue;
+        }
+
+        //  int32_t stop_time = esp_timer_get_time() - start_time;
+        // Update performance counters and print benchmark
+        //  sdmmc_benchmark_printf();
+        return RES_OK;
+    }
+
+    printf("[READ]Cannot read sector %d\n", sector);
+    return RES_ERROR;
+}
+```
