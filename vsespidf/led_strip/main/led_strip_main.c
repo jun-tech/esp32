@@ -37,7 +37,8 @@ void led_strip_hsv2rgb(uint32_t h, uint32_t s, uint32_t v, uint32_t *r, uint32_t
     // RGB adjustment amount by hue
     uint32_t rgb_adj = (rgb_max - rgb_min) * diff / 60;
 
-    switch (i) {
+    switch (i)
+    {
     case 0:
         *r = rgb_max;
         *g = rgb_min + rgb_adj;
@@ -89,16 +90,20 @@ void app_main(void)
     // install ws2812 driver
     led_strip_config_t strip_config = LED_STRIP_DEFAULT_CONFIG(CONFIG_EXAMPLE_STRIP_LED_NUMBER, (led_strip_dev_t)config.channel);
     led_strip_t *strip = led_strip_new_rmt_ws2812(&strip_config);
-    if (!strip) {
+    if (!strip)
+    {
         ESP_LOGE(TAG, "install WS2812 driver failed");
     }
     // Clear LED strip (turn off all LEDs)
     ESP_ERROR_CHECK(strip->clear(strip, 100));
     // Show simple rainbow chasing pattern
     ESP_LOGI(TAG, "LED Rainbow Chase Start");
-    while (true) {
-        for (int i = 0; i < 3; i++) {
-            for (int j = i; j < CONFIG_EXAMPLE_STRIP_LED_NUMBER; j += 3) {
+    while (true)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = i; j < CONFIG_EXAMPLE_STRIP_LED_NUMBER; j += 3)
+            {
                 // Build RGB values
                 hue = j * 360 / CONFIG_EXAMPLE_STRIP_LED_NUMBER + start_rgb;
                 led_strip_hsv2rgb(hue, 100, 100, &red, &green, &blue);
