@@ -1,0 +1,18 @@
+{
+    "C_Cpp.intelliSenseEngine": "default",
+    "idf.espIdfPathWin": "e:\\espressif445\\esp-idf",
+    "idf.toolsPathWin": "e:\\espressif445",
+    "idf.pythonInstallPath": "e:\\espressif445\\tools\\idf-python\\3.8.7\\python.exe",
+    "idf.customExtraVars": {
+        "OPENOCD_SCRIPTS": "d:\\ESP-IDF\\tools\\openocd-esp32\\v0.10.0-esp32-20210401/openocd-esp32/share/openocd/scripts",
+        "IDF_CCACHE_ENABLE": "1",
+        "IDF_TARGET": "esp32"
+    },
+    "idf.openOcdConfigs": [
+        "board/esp32-wrover-kit-3.3v.cfg"
+    ],
+    "idf.portWin": "COM4",
+    "files.associations": {
+        "ledc.h": "c"
+    }
+}
