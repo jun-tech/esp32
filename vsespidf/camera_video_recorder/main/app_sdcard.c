@@ -1,4 +1,5 @@
 #include "app_sdcard.h"
+#include <errno.h>
 #include "esp_log.h"
 #include "esp_camera.h"
 #include <string.h>
@@ -221,6 +222,7 @@ void save_video(void *vparams)
             ESP_LOGI(TAG, "usage %.2f(Precent)", precent);
             if (precent > 70)
             {
+                ESP_LOGI(TAG, "usage by over %.2f(Precent)", precent);
                 sdcard_remove(20);
             }
         }
@@ -257,7 +259,8 @@ void save_video2(void *vparams)
     {
         time(&now);
         timeinfo = localtime(&now);
-        strftime(fname, 80, MOUNT_POINT "/record_%Y%m%d_%H%M.avi", timeinfo);
+        // strftime(fname, 40, MOUNT_POINT "/record_%Y%m%d_%H%M.avi", timeinfo); // 这里的文件名不能太长，否则就会报参数错误
+        strftime(fname, 40, MOUNT_POINT "/%m%d%H%M.avi", timeinfo);
         // 保存视频
         esp_err_t flag = get_video_size(&video_w, &video_h);
         if (flag == ESP_OK)
@@ -286,9 +289,20 @@ void save_video2(void *vparams)
         }
 
         int i = 0;
+        ESP_LOGI(TAG, "open writed file %s", fname);
+        errno = 0; // 先重置下错误码
         FILE *f = fopen(fname, "wb");
-        jpeg2avi_start(f);
-        ESP_LOGI(TAG, "save_video start");
+        if (f)
+        {
+            ESP_LOGI(TAG, "save_video start");
+            jpeg2avi_start(f);
+        }
+        else
+        {
+            ESP_LOGI(TAG, "fopen fail reason: %s\n", strerror(errno));
+            vTaskDelete(NULL);
+            return;
+        }
         while (1)
         {
             camera_fb_t *fb = esp_camera_fb_get();

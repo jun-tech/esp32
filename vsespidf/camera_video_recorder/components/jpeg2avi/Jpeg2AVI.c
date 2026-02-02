@@ -122,7 +122,6 @@ void jpeg2avi_start(FILE *fp)
 
     // AVI文件偏移量设置到movi list head后，从该位置向后依次写入JPEG数据
     fseek(fp, offset1 + offset2 + offset3, SEEK_SET);
-
     // 初始化链表
     list_head_init(&list);
 
