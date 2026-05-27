@@ -30,6 +30,7 @@ static const char *TAG = "example";
 
 // DMA channel to be used by the SPI peripheral
 #define SPI_DMA_CHAN 1
+// #define SPI_DMA_CHAN SPI_DMA_CH_AUTO // esp32s3 不成功
 
 // When testing SD and SPI modes, keep in mind that once the card has been
 // initialized in SPI mode, it can not be reinitialized in SD mode without
@@ -42,6 +43,12 @@ static const char *TAG = "example";
 #define PIN_NUM_MOSI 23
 #define PIN_NUM_CLK 18
 #define PIN_NUM_CS 5
+
+// esp32s3
+// #define PIN_NUM_MISO 2
+// #define PIN_NUM_MOSI 1
+// #define PIN_NUM_CLK 42
+// #define PIN_NUM_CS 39
 
 void app_main(void)
 {

@@ -11,5 +11,14 @@
     "sdkconfig.h": "c",
     "esp_vfs_fat.h": "c"
   },
-  "idf.portWin": "COM4"
+  "idf.portWin": "COM21",
+  "idf.pythonInstallPath": "e:\\espressif445\\tools\\idf-python\\3.8.7\\python.exe",
+  "idf.openOcdConfigs": [
+    "board/esp32s3-builtin.cfg"
+  ],
+  "idf.customExtraVars": {
+    "OPENOCD_SCRIPTS": "d:\\ESP-IDF\\tools\\openocd-esp32\\v0.10.0-esp32-20210401/openocd-esp32/share/openocd/scripts",
+    "IDF_CCACHE_ENABLE": "1",
+    "IDF_TARGET": "esp32s3"
+  }
 }

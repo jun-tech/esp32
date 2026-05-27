@@ -13,5 +13,6 @@
     "lvgl_helpers.h": "c",
     "st7796s.h": "c"
   },
-  "idf.portWin": "COM8"
+  "idf.portWin": "COM8",
+  "idf.pythonInstallPath": "e:\\espressif445\\tools\\idf-python\\3.8.7\\python.exe"
 }
