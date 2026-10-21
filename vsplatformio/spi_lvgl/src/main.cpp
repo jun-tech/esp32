@@ -17,7 +17,7 @@ static const uint16_t screenWidth = TFT_WIDTH;
 static const uint16_t screenHeight = TFT_HEIGHT;
 
 TFT_eSPI tft = TFT_eSPI(screenWidth, screenHeight); /* TFT instance */
-// XPT2046_Touchscreen ts(TOUCH_CS);                   // Param 2 - NULL - No interrupts
+XPT2046_Touchscreen ts(TOUCH_CS);                   // Param 2 - NULL - No interrupts
 
 // void touch_xpt2046_init(void)
 // {

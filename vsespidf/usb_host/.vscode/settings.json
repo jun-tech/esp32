@@ -13,5 +13,6 @@
         "ESP_ROM_ELF_DIR": "E:\\espressif512\\tools\\esp-rom-elfs\\20230320/",
         "IDF_TARGET": "esp32s3"
     },
-    "idf.flashType": "UART"
+    "idf.flashType": "UART",
+    "idf.currentSetup": "E:\\espressif541\\v5.4.1\\esp-idf"
 }
