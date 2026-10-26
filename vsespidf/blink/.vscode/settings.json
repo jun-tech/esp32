@@ -8,5 +8,6 @@
   },
   "idf.openOcdConfigs": [
     "board/esp32-bridge.cfg"
-  ]
+  ],
+  "idf.currentSetup": "E:/espressif-versions/v4.4.5/frameworks/esp-idf-v4.4.5/"
 }

@@ -3,8 +3,6 @@
   "files.associations": {
     "lvgl_sdcard.h": "c"
   },
-  "idf.portWin": "COM4",
   "idf.flashType": "UART",
-  "idf.adapterTargetName": "esp32",
-  "idf.pythonInstallPath": "e:\\espressif445\\tools\\idf-python\\3.8.7\\python.exe"
+  "idf.currentSetup": "E:/espressif-versions/v4.4.5/frameworks/esp-idf-v4.4.5/"
 }
