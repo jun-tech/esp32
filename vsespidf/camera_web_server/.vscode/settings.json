@@ -1,6 +1,6 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
-  "idf.port": "/dev/ttyUSB0",
+  "idf.port": "COM233",
   "idf.adapterTargetName": "esp32",
   "idf.openOcdConfigs": [
     "board/esp32-bridge.cfg"
@@ -21,5 +21,6 @@
     "core.hpp": "c",
     "esp_log.h": "c"
   },
-  "idf.portWin": "COM20"
+  "idf.portWin": "COM20",
+  "idf.currentSetup": "E:/espressif-versions/v4.4.5/frameworks/esp-idf-v4.4.5/"
 }

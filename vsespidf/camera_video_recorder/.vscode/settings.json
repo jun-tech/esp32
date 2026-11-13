@@ -1,6 +1,6 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
-  "idf.port": "/dev/ttyUSB0",
+  "idf.port": "COM233",
   "idf.adapterTargetName": "esp32",
   "idf.openOcdConfigs": [
     "board/esp32s3-builtin.cfg"
@@ -43,5 +43,6 @@
     "OPENOCD_SCRIPTS": "d:\\ESP-IDF\\tools\\openocd-esp32\\v0.10.0-esp32-20210401/openocd-esp32/share/openocd/scripts",
     "IDF_CCACHE_ENABLE": "1",
     "IDF_TARGET": "esp32"
-  }
+  },
+  "idf.currentSetup": "E:/espressif-versions/v4.4.5/frameworks/esp-idf-v4.4.5/"
 }
